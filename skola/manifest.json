@@ -1,0 +1,17 @@
+{
+  "id": "/Aplikacije/skola/",
+  "name": "Škola",
+  "short_name": "Škola",
+  "start_url": "/Aplikacije/skola/",
+  "scope": "/Aplikacije/skola/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#0f0f1a",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Owl/3D/owl_3d.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}
