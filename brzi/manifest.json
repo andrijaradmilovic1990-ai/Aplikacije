@@ -1,8 +1,8 @@
 {
-  "id": "/Aplikacije/brzi/",
+  "id": "/Aplikacije/brzi/?app=2",
   "name": "Brzi unos",
   "short_name": "Brzi unos",
-  "start_url": "/Aplikacije/brzi/",
+  "start_url": "/Aplikacije/brzi/?app=2",
   "scope": "/Aplikacije/brzi/",
   "display": "standalone",
   "background_color": "#0f0f1a",
