@@ -1,0 +1,30 @@
+{
+  "id": "/Aplikacije/pisanje/",
+  "name": "Pisalnica",
+  "short_name": "Pisalnica",
+  "start_url": "/Aplikacije/pisanje/",
+  "scope": "/Aplikacije/pisanje/",
+  "display": "standalone",
+  "background_color": "#13110e",
+  "theme_color": "#13110e",
+  "icons": [
+    {
+      "src": "/Aplikacije/pisanje/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Aplikacije/pisanje/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Aplikacije/pisanje/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

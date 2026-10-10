@@ -6,6 +6,7 @@ Male aplikacije za telefon. **Svaka aplikacija = svoj folder** sa svojim `UPUTST
 |---|---|---|---|
 | `skola/` | Škola — samoobrazovanje (70 lekcija, ponavljanje) | https://skola-app.andrija-radmilovic1990.workers.dev | `skola/UPUTSTVO.md` |
 | `brzi/` | Brzi unos — trošak u Budžet jednim potezom | https://brzi-app.andrija-radmilovic1990.workers.dev | `brzi/UPUTSTVO.md` |
+| `pisanje/` | Pisalnica — pisanje priča | https://andrijaradmilovic1990-ai.github.io/Aplikacije/pisanje/ (ostaje na github.io — tekstovi su u telefonu, vezani za tu adresu) | `pisanje/UPUTSTVO.md` |
 
 Budžet nije ovde — ima svoj repo **Budzet**.
 
