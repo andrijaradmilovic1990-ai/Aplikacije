@@ -94,7 +94,9 @@ textarea:focus{outline:none;border-color:var(--accent)}
 import {OBLASTI, RED, RAZMACI} from './lekcije.js';
 
 const PROBA = new URLSearchParams(location.search).has('proba');
-const ANDRIJA = 'andrija.radmilovic1990@gmail.com';
+// vlasnik (Andrija) se prepoznaje po SHA-256 otisku mejla — mejl ne stoji u javnom repou
+const VLASNIK_SHA = '2bbbca646f9821412aae27d7a58fbdf5e95bc9ab6797e96d5ad5c9b357f9037b';
+async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 let SA_HELENOM = !(PROBA && new URLSearchParams(location.search).has('gost'));
 const $app = document.getElementById('app');
 const SVE = [];
@@ -150,7 +152,7 @@ else{document.getElementById('gate-sub').textContent='Prijavi se istim nalogom k
 });
 });
 onValue(ref(db,'.info/connected'),s=>{const e=document.getElementById('sync');if(e)e.textContent=s.val()?'● povezano':'○ nije povezano'});
-SA_HELENOM = korisnik.email===ANDRIJA;
+SA_HELENOM = (await sha256(String(korisnik.email||'').trim().toLowerCase()))===VLASNIK_SHA;
 const koren = SA_HELENOM ? 'skola' : 'skola_gost/'+korisnik.uid;
 return {
 async citaj(){return (await get(ref(db,koren))).val()||{}},

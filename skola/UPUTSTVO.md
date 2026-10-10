@@ -35,4 +35,5 @@
    - `node skola/testovi/struktura.mjs` → „struktura OK"
    - `python3 -m http.server 8766 &` pa `U=http://localhost:8766/skola/?proba PW=$(npm root -g)/playwright node skola/testovi/test-skola.js` → sve PROŠLO
    - gost: isto na 8767 sa `skola/testovi/test-gost.js`
+   - vlasnik (prepoznavanje po SHA-256 otisku mejla; mejl ne stoji u repou): `VLASNIK_EMAIL=<Andrijin mejl> node skola/testovi/test-vlasnik.mjs` → SVE PROŠLO
 5. Push na `main`; posle par minuta isti test uživo: `U='https://skola-app.andrija-radmilovic1990.workers.dev/?proba'`.
