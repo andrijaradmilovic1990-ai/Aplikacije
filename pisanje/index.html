@@ -2,6 +2,7 @@
 <html lang="sr">
 <head>
 <meta charset="UTF-8">
+<script>/* svaka aplikacija svoja adresa (telefon ne pušta dve sa iste); tekstovi sa github.io se jednom prenesu na novu adresu, a na github.io ostaje kopija */(function(){if(!location.hostname.endsWith('github.io')||/[?&]proba/.test(location.search))return;var h='';try{if(!localStorage.getItem('pisalnica_prenet')||/[?&]prenesi/.test(location.search)){var d=localStorage.getItem('pisalnica_data_v1');if(d)h='#prenos='+encodeURIComponent(btoa(unescape(encodeURIComponent(d))));localStorage.setItem('pisalnica_prenet','1')}}catch(e){}location.replace('https://pisanje-app.andrija-radmilovic1990.workers.dev/Aplikacije/pisanje/'+h)})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#13110e">
 <title>Pisalnica</title>
@@ -317,6 +318,15 @@ function load(){
   catch(e){return {stories:[],theme:'dark',lastWrite:null,streak:0}}
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+// Prenos sa github.io (jednom): dodaje priče i poglavlja kojih ovde nema; postojeće se ne diraju.
+(function(){const m=location.hash.match(/^#prenos=(.+)$/);if(!m)return;
+  try{const inc=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+    (inc.stories||[]).forEach(s=>{const l=data.stories.find(x=>x.id===s.id);
+      if(!l){data.stories.push(s);return}
+      (s.chapters||[]).forEach(ch=>{if(!l.chapters.find(c=>c.id===ch.id))l.chapters.push(ch)})});
+    if(!data.streak&&inc.streak){data.streak=inc.streak;data.lastWrite=inc.lastWrite}
+    save()}catch(e){}
+  history.replaceState(null,'',location.pathname+location.search)})();
 
 let view='library',curStory=null,curChapter=null,saveTimer=null;
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
