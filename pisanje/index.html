@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#13110e">
+<title>Pisalnica</title>
+<link rel="manifest" href="/Aplikacije/pisanje/manifest.json">
+<link rel="apple-touch-icon" href="/Aplikacije/pisanje/icon-192.png">
+<link rel="icon" type="image/png" href="/Aplikacije/pisanje/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#13110e;--bg2:#1a1713;--surface:#1e1a15;--surface2:#272118;
+    --accent:#c9a55c;--accent-soft:#a88845;
+    --text:#ece5d8;--text2:#9a8f7c;--text3:#6b6253;
+    --border:#2e2820;--red:#cc6b5a;
+    --radius:14px;--radius-sm:9px;
+    --shadow:0 4px 24px rgba(0,0,0,.4);
+    --display:'Fraunces',Georgia,serif;
+    --body:'Spectral',Georgia,serif;
+  }
+  body.sepia{
+    --bg:#272015;--bg2:#2f2719;--surface:#33291a;--surface2:#3d3120;
+    --accent:#e0b65f;--accent-soft:#c79a48;
+    --text:#f0e6cf;--text2:#bcaa84;--text3:#8a7a5a;--border:#42351f;
+  }
+  body.paper{
+    --bg:#e8e1d2;--bg2:#efe9dc;--surface:#f4efe4;--surface2:#ebe3d2;
+    --accent:#9a6f3a;--accent-soft:#b08440;
+    --text:#2b2419;--text2:#6b5f4a;--text3:#9a8c72;--border:#d6cbb4;
+    --shadow:0 4px 24px rgba(120,100,60,.12);
+  }
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--body);
+    display:flex;flex-direction:column;overflow:hidden;transition:background .4s,color .4s;
+    background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,165,92,.06),transparent 60%);
+  }
+  .topbar{
+    display:flex;align-items:center;gap:.4rem;
+    padding:calc(env(safe-area-inset-top) + .85rem) 1.1rem .85rem;
+    flex-shrink:0;min-height:58px;position:relative;z-index:5;
+  }
+  .topbar .back{background:none;border:none;color:var(--text2);font-size:26px;cursor:pointer;padding:0 .3rem 0 0;line-height:1;display:none;transition:color .2s}
+  .topbar .back:active{color:var(--accent)}
+  .topbar .title{flex:1;font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar .logo{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:-.02em}
+  .topbar .logo .ink{color:var(--accent)}
+  .topbar .streak{font-size:12px;color:var(--text3);white-space:nowrap;letter-spacing:.02em}
+  .topbar .icon-btn{background:none;border:none;color:var(--text2);font-size:19px;cursor:pointer;padding:.3rem .45rem;line-height:1;transition:color .2s}
+  .topbar .icon-btn:active{color:var(--accent)}
+  .topbar .icon-btn.install{color:var(--accent);font-size:21px}
+  .screen{flex:1;overflow-y:auto;display:none;flex-direction:column;-webkit-overflow-scrolling:touch}
+  .screen.active{display:flex;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .list-wrap{padding:.5rem 1.1rem 2rem;max-width:680px;margin:0 auto;width:100%}
+  .section-hint{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;margin:.3rem .2rem 1rem}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.05rem 1.15rem;margin-bottom:.65rem;cursor:pointer;display:flex;align-items:center;gap:.95rem;
+    transition:transform .15s,border-color .2s,background .2s;box-shadow:var(--shadow);
+    animation:rise .4s ease backwards;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .card:active{transform:scale(.985);background:var(--surface2)}
+  .card-icon{font-size:21px;flex-shrink:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:11px;border:1px solid var(--border)}
+  .card-body{flex:1;min-width:0}
+  .card-title{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+  .card-meta{font-size:12.5px;color:var(--text2);margin-top:3px;letter-spacing:.01em}
+  .card-menu{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;padding:.3rem .55rem;line-height:1;flex-shrink:0;transition:color .2s}
+  .card-menu:active{color:var(--accent)}
+  .add-btn{
+    width:100%;max-width:680px;margin:.6rem auto 0;display:flex;align-items:center;justify-content:center;gap:.5rem;
+    background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;border-radius:var(--radius);
+    padding:.95rem;color:#1a1610;font-size:15px;font-weight:600;cursor:pointer;
+    box-shadow:0 4px 18px rgba(201,165,92,.22);transition:transform .15s,box-shadow .2s;letter-spacing:.01em;
+  }
+  .add-btn:active{transform:scale(.98);box-shadow:0 2px 10px rgba(201,165,92,.2)}
+  .empty{text-align:center;color:var(--text2);font-size:15px;padding:3.5rem 1rem 2rem;line-height:1.9;font-family:var(--display);font-style:italic}
+  .empty .big{font-size:34px;display:block;margin-bottom:.8rem;opacity:.5;font-style:normal}
+  .export-bar{display:flex;gap:.5rem;max-width:680px;margin:0 auto .9rem;width:100%;flex-wrap:wrap}
+  .export-btn{
+    flex:1;min-width:72px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:.7rem;color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:.4rem;transition:background .2s
+  }
+  .export-btn:active{background:var(--surface2)}
+  .editor-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .fmt-bar{
+    display:flex;gap:.4rem;align-items:center;
+    padding:.45rem 1.4rem;max-width:680px;margin:0 auto;width:100%;
+    border-bottom:1px solid var(--border);flex-shrink:0;
+  }
+  .fmt-btn{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+    min-width:42px;height:34px;color:var(--text2);font-size:15px;cursor:pointer;
+    font-family:var(--body);transition:all .15s;display:inline-flex;align-items:center;justify-content:center;
+  }
+  .fmt-btn:active{background:var(--surface2);color:var(--accent)}
+  .fmt-btn b{font-weight:800}
+  .fmt-btn i{font-style:italic}
+  .fmt-hint{margin-left:auto;font-size:11px;color:var(--text3);letter-spacing:.02em}
+  .editor-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .editor-inner{max-width:680px;margin:0 auto;width:100%;padding:1rem 1.4rem 6rem}
+  .editor-text{
+    width:100%;background:transparent;border:none;color:var(--text);
+    font-size:18px;line-height:1.85;resize:none;outline:none;font-family:var(--body);
+    min-height:60vh;letter-spacing:.005em;
+  }
+  .editor-text::placeholder{color:var(--text3);opacity:.6;font-style:italic}
+  .wordcount{
+    position:fixed;bottom:calc(env(safe-area-inset-bottom) + .9rem);left:50%;transform:translateX(-50%);
+    font-size:12px;color:var(--text2);background:var(--surface);padding:.4rem .9rem;border-radius:20px;
+    border:1px solid var(--border);pointer-events:none;box-shadow:var(--shadow);letter-spacing:.04em;transition:opacity .3s
+  }
+  .modal-overlay{position:fixed;inset:0;background:rgba(8,6,4,.78);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;padding:1.25rem;opacity:0;pointer-events:none;transition:opacity .25s}
+  .modal-overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;width:100%;max-width:410px;transform:scale(.94) translateY(8px);transition:transform .25s;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .modal-overlay.open .modal{transform:none}
+  .modal h3{font-family:var(--display);font-size:19px;font-weight:600;margin-bottom:1.2rem;letter-spacing:-.01em}
+  .modal input,.modal textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem .9rem;color:var(--text);font-size:15px;margin-bottom:1.1rem;font-family:var(--body)}
+  .modal textarea{min-height:140px;resize:vertical;line-height:1.6}
+  .modal input:focus,.modal textarea:focus{outline:none;border-color:var(--accent)}
+  .modal-btns{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .btn-cancel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem;color:var(--text2);font-size:14px;cursor:pointer;font-family:var(--body)}
+  .btn-save{background:var(--accent);border:none;border-radius:var(--radius-sm);padding:.8rem;color:#1a1610;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body)}
+  .btn-del{background:rgba(204,107,90,.15);border:1px solid rgba(204,107,90,.35);border-radius:var(--radius-sm);padding:.8rem;color:var(--red);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body)}
+  .sheet-overlay{position:fixed;inset:0;background:rgba(8,6,4,.6);z-index:90;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+  .sheet-overlay.open{opacity:1;pointer-events:all}
+  .sheet{background:var(--surface);border-top:1px solid var(--border);border-radius:18px 18px 0 0;width:100%;max-width:680px;margin:0 auto;padding:.6rem 0 calc(env(safe-area-inset-bottom) + .6rem);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);box-shadow:0 -8px 40px rgba(0,0,0,.4)}
+  .sheet-overlay.open .sheet{transform:translateY(0)}
+  .sheet-grip{width:38px;height:4px;background:var(--border);border-radius:3px;margin:.3rem auto .7rem}
+  .sheet-item{padding:1rem 1.6rem;font-size:15.5px;cursor:pointer;display:flex;align-items:center;gap:.85rem;border:none;background:none;color:var(--text);width:100%;text-align:left;font-family:var(--body)}
+  .sheet-item:active{background:var(--surface2)}
+  .sheet-item.danger{color:var(--red)}
+  .sheet-item .si{font-size:18px;width:24px;text-align:center}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.15rem;margin-bottom:.65rem;box-shadow:var(--shadow)}
+  .settings-row .lbl{font-size:14.5px}
+  .theme-opts{display:flex;gap:.45rem}
+  .theme-chip{padding:.45rem .9rem;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;font-family:var(--body);transition:all .2s}
+  .theme-chip.active{background:var(--accent);color:#1a1610;border-color:var(--accent);font-weight:600}
+  .about{text-align:center;color:var(--text3);font-size:13.5px;padding:2rem 1rem 1rem;line-height:1.9;font-family:var(--display);font-style:italic}
+  .kafana-btn{
+    width:100%;max-width:680px;margin:.55rem auto 0;display:flex;align-items:center;justify-content:center;gap:.5rem;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:.9rem;color:var(--accent);font-size:14.5px;font-family:var(--body);cursor:pointer;
+    box-shadow:var(--shadow);transition:transform .15s,background .2s;letter-spacing:.01em;
+  }
+  .kafana-btn:active{transform:scale(.98);background:var(--surface2)}
+  .kafana-btn .k-sub{color:var(--text3);font-size:12.5px;font-style:italic}
+  .kafana-btns{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .k-btn{
+    flex:1;min-width:130px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:.8rem .55rem;color:var(--text2);font-size:13.5px;font-family:var(--body);cursor:pointer;transition:all .2s;
+  }
+  .k-btn:active{background:var(--surface2);color:var(--accent)}
+  .k-glass{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.6rem 1.4rem;min-height:120px;display:flex;align-items:center;box-shadow:var(--shadow);
+  }
+  .k-glass p{font-family:var(--display);font-style:italic;font-size:17.5px;line-height:1.7;color:var(--text);transition:opacity .35s;margin:0}
+  .k-helena{margin:.7rem .2rem 0;font-size:13px;color:var(--text3);font-style:italic;line-height:1.6;transition:opacity .35s}
+  .k-helena .hname{color:var(--accent-soft);font-style:normal;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-right:.35rem}
+  .k-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.9rem;color:var(--text3);font-size:12px;letter-spacing:.03em;flex-wrap:wrap}
+  .k-actions{display:flex;gap:.5rem}
+  .k-copy{background:none;border:1px solid var(--border);border-radius:20px;padding:.45rem .95rem;color:var(--text2);font-size:12.5px;cursor:pointer;font-family:var(--body);transition:background .2s}
+  .k-copy:active{background:var(--surface2)}
+  .k-razradi{background:none;border:1px solid var(--accent-soft);border-radius:20px;padding:.45rem .95rem;color:var(--accent);font-size:12.5px;cursor:pointer;font-family:var(--body);transition:background .2s}
+  .k-razradi:active{background:var(--surface2)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back" id="backBtn" onclick="goBack()">‹</button>
+  <span class="title" id="topTitle"><span class="logo">Pisal<span class="ink">nica</span></span></span>
+  <span class="streak" id="streakLbl"></span>
+  <button class="icon-btn install" id="installBtn" onclick="doInstall()" style="display:none" title="Instaliraj aplikaciju">⤓</button>
+  <button class="icon-btn" id="settingsBtn" onclick="openSettings()">⚙</button>
+</div>
+
+<div class="screen active" id="screen-library">
+  <div class="list-wrap">
+    <div class="section-hint" id="lib-hint">Tvoje priče</div>
+    <div id="story-list"></div>
+    <button class="add-btn" onclick="openNewStory()">✒ Nova priča</button>
+    <button class="kafana-btn" onclick="openKafana()">🥃 Kafana „Kod Helene" <span class="k-sub">· otvoreno do zore</span></button>
+  </div>
+</div>
+
+<div class="screen" id="screen-chapters">
+  <div class="list-wrap">
+    <div class="export-bar">
+      <button class="export-btn" onclick="exportStory('md')">📤 .md</button>
+      <button class="export-btn" onclick="exportStory('doc')">📝 Word</button>
+      <button class="export-btn" onclick="exportStory('pdf')">📄 PDF</button>
+      <button class="export-btn" onclick="openImport()">📥 Nalepi</button>
+    </div>
+    <div id="chapter-list"></div>
+    <button class="add-btn" onclick="openNewChapter()">+ Novo poglavlje</button>
+  </div>
+</div>
+
+<div class="screen" id="screen-editor">
+  <div class="editor-area">
+    <div class="fmt-bar">
+      <button class="fmt-btn" onmousedown="fmtMouse(event)" ontouchstart="fmtMouse(event)" onclick="wrapSel('**')" title="Podebljano"><b>B</b></button>
+      <button class="fmt-btn" onmousedown="fmtMouse(event)" ontouchstart="fmtMouse(event)" onclick="wrapSel('*')" title="Kurziv"><i>I</i></button>
+      <span class="fmt-hint">selektuj reč pa klikni</span>
+    </div>
+    <div class="editor-scroll">
+      <div class="editor-inner">
+        <textarea class="editor-text" id="editor" placeholder="Počni da pišeš…" oninput="onEditorInput()"></textarea>
+      </div>
+    </div>
+    <div class="wordcount" id="wordcount">0 reči</div>
+  </div>
+</div>
+
+<div class="screen" id="screen-kafana">
+  <div class="list-wrap">
+    <div class="section-hint">Šank · Helena toči</div>
+    <div class="kafana-btns">
+      <button class="k-btn" onclick="sipaj('recenice')">✒ Prva rečenica</button>
+      <button class="k-btn" onclick="sipaj('likovi')">👤 Lik za priču</button>
+      <button class="k-btn" onclick="sipaj('pitanja')">🌙 Pitanje za 3 ujutru</button>
+    </div>
+    <div class="k-glass" id="kGlass"><p id="kTekst">Sedi. Šta pijemo večeras?</p></div>
+    <div class="k-helena" id="kHelena"><span class="hname">Helena</span>Ja sipam, ti pišeš. Takav je dogovor.</div>
+    <div class="k-foot">
+      <span id="kBrojac">popijeno: 0</span>
+      <div class="k-actions">
+        <button class="k-copy" id="kCopy" onclick="kKopiraj()" style="display:none">⎘ Prepiši</button>
+        <button class="k-razradi" id="kRazradi" onclick="kRazradi()" style="display:none">🥃 Razradi sa Helenom</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-settings">
+  <div class="list-wrap">
+    <div class="section-hint">Izgled</div>
+    <div class="settings-row">
+      <span class="lbl">Pozadina</span>
+      <div class="theme-opts">
+        <button class="theme-chip" id="theme-dark" onclick="setTheme('dark')">Noć</button>
+        <button class="theme-chip" id="theme-sepia" onclick="setTheme('sepia')">Sepia</button>
+        <button class="theme-chip" id="theme-paper" onclick="setTheme('paper')">Papir</button>
+      </div>
+    </div>
+    <div class="section-hint" style="margin-top:1.4rem">Sigurnost</div>
+    <div class="settings-row">
+      <span class="lbl">Izvezi sve priče (.md)</span>
+      <button class="theme-chip" onclick="exportAll()">📤 Sve</button>
+    </div>
+    <div class="about">
+      „Pisanje je lako. Samo zuriš u prazan papir<br>dok ti kapljice krvi ne izbiju na čelu."<br><br>
+      <b>**ovako**</b> = podebljano · <i>*ovako*</i> = kurziv<br><br>
+      Sve se čuva lokalno na ovom uređaju.
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="name-modal" onclick="closeNameOutside(event)">
+  <div class="modal">
+    <h3 id="name-modal-title">Naziv</h3>
+    <input type="text" id="name-input" placeholder="Unesi naziv…">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeNameModal()">Otkaži</button>
+      <button class="btn-save" onclick="confirmName()">Sačuvaj</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="import-modal" onclick="closeImportOutside(event)">
+  <div class="modal">
+    <h3>Nalepi tekst</h3>
+    <input type="text" id="import-title" placeholder="Naziv poglavlja…">
+    <textarea id="import-text" placeholder="Nalepi tekst ovde…"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeImportModal()">Otkaži</button>
+      <button class="btn-save" onclick="confirmImport()">Ubaci</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="del-modal" onclick="closeDelOutside(event)">
+  <div class="modal">
+    <h3 id="del-modal-title">Obrisati?</h3>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeDelModal()">Otkaži</button>
+      <button class="btn-del" onclick="confirmDelete()">Obriši</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet" onclick="closeSheetOutside(event)">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <button class="sheet-item" onclick="sheetRename()"><span class="si">✏️</span> Preimenuj</button>
+    <button class="sheet-item" onclick="sheetExport('md')"><span class="si">📤</span> Izvezi .md</button>
+    <button class="sheet-item" onclick="sheetExport('doc')"><span class="si">📝</span> Izvezi Word</button>
+    <button class="sheet-item" onclick="sheetExport('pdf')"><span class="si">📄</span> Izvezi PDF</button>
+    <button class="sheet-item danger" onclick="sheetDelete()"><span class="si">🗑️</span> Obriši</button>
+  </div>
+</div>
+
+<script>
+const KEY='pisalnica_data_v1';
+let data=load();
+function load(){
+  try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):{stories:[],theme:'dark',lastWrite:null,streak:0}}
+  catch(e){return {stories:[],theme:'dark',lastWrite:null,streak:0}}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+
+let view='library',curStory=null,curChapter=null,saveTimer=null;
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function story(id){return data.stories.find(s=>s.id===id)}
+function chapter(s,id){return s?s.chapters.find(c=>c.id===id):null}
+function countWords(t){const m=(t||'').trim().match(/\S+/g);return m?m.length:0}
+
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function bumpStreak(){
+  const t=todayStr();if(data.lastWrite===t)return;
+  const y=new Date();y.setDate(y.getDate()-1);
+  const yStr=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
+  data.streak=(data.lastWrite===yStr)?(data.streak||0)+1:1;
+  data.lastWrite=t;save();renderStreak();
+}
+function renderStreak(){
+  const el=document.getElementById('streakLbl');
+  el.textContent=(data.streak>0&&view==='library')?`✦ ${data.streak} ${data.streak===1?'dan':'dana'} zaredom`:'';
+}
+
+function show(v){
+  view=v;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+v).classList.add('active');
+  const back=document.getElementById('backBtn'),settings=document.getElementById('settingsBtn'),title=document.getElementById('topTitle');
+  back.style.display=(v==='library')?'none':'block';
+  settings.style.display=(v==='library')?'block':'none';
+  if(v==='library')title.innerHTML='<span class="logo">Pisal<span class="ink">nica</span></span>';
+  else if(v==='chapters')title.textContent=story(curStory)?.title||'';
+  else if(v==='editor')title.textContent=chapter(story(curStory),curChapter)?.title||'';
+  else if(v==='settings')title.textContent='Podešavanja';
+  else if(v==='kafana')title.textContent='Kod Helene';
+  renderStreak();
+}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function renderLibrary(){
+  const c=document.getElementById('story-list');
+  document.getElementById('lib-hint').style.display=data.stories.length?'block':'none';
+  if(!data.stories.length){c.innerHTML='<div class="empty"><span class="big">✒</span>Još nema priča.<br>Počni svoju prvu.</div>';return}
+  c.innerHTML=data.stories.map((s,i)=>{
+    const words=s.chapters.reduce((sum,ch)=>sum+countWords(ch.text),0);
+    return `<div class="card" style="animation-delay:${i*.04}s" onclick="openStory('${s.id}')">
+      <span class="card-icon">📖</span>
+      <div class="card-body"><div class="card-title">${esc(s.title)}</div>
+        <div class="card-meta">${s.chapters.length} ${s.chapters.length===1?'poglavlje':'poglavlja'} · ${words} reči</div></div>
+      <button class="card-menu" onclick="event.stopPropagation();openSheet('story','${s.id}')">⋯</button></div>`;
+  }).join('');
+}
+function renderChapters(){
+  const s=story(curStory);if(!s)return;
+  const c=document.getElementById('chapter-list');
+  if(!s.chapters.length){c.innerHTML='<div class="empty"><span class="big">📄</span>Nema poglavlja.<br>Dodaj prvo.</div>';return}
+  c.innerHTML=s.chapters.map((ch,i)=>{
+    const w=countWords(ch.text);
+    return `<div class="card" style="animation-delay:${i*.04}s" onclick="openChapter('${ch.id}')">
+      <span class="card-icon">📄</span>
+      <div class="card-body"><div class="card-title">${esc(ch.title)}</div>
+        <div class="card-meta">${w} reči</div></div>
+      <button class="card-menu" onclick="event.stopPropagation();openSheet('chapter','${ch.id}')">⋯</button></div>`;
+  }).join('');
+}
+
+window.openStory=function(id){curStory=id;renderChapters();show('chapters')};
+window.openChapter=function(id){
+  curChapter=id;
+  document.getElementById('editor').value=chapter(story(curStory),curChapter)?.text||'';
+  updateWordcount();show('editor');
+  setTimeout(()=>document.getElementById('editor').focus(),120);
+};
+window.goBack=function(){
+  if(view==='editor'){flushSave();show('chapters');renderChapters()}
+  else if(view==='chapters'){show('library');renderLibrary()}
+  else if(view==='settings'){show('library');renderLibrary()}
+  else if(view==='kafana'){show('library');renderLibrary()}
+};
+window.openSettings=function(){show('settings')};
+window.openKafana=function(){show('kafana')};
+
+window.onEditorInput=function(){updateWordcount();clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,400)};
+function flushSave(){const ch=chapter(story(curStory),curChapter);if(!ch)return;ch.text=document.getElementById('editor').value;save();bumpStreak()}
+function updateWordcount(){document.getElementById('wordcount').textContent=countWords(document.getElementById('editor').value)+' reči'}
+
+/* ---- Markdown formatiranje (bold/kurziv) ---- */
+function fmtMouse(e){ e.preventDefault(); } // sačuvaj selekciju u textarea
+window.wrapSel=function(marker){
+  const ta=document.getElementById('editor');
+  const s=ta.selectionStart, e=ta.selectionEnd, val=ta.value, sel=val.slice(s,e);
+  if(sel){
+    ta.value=val.slice(0,s)+marker+sel+marker+val.slice(e);
+    ta.selectionStart=s+marker.length; ta.selectionEnd=e+marker.length;
+  } else {
+    ta.value=val.slice(0,s)+marker+marker+val.slice(e);
+    ta.selectionStart=ta.selectionEnd=s+marker.length;
+  }
+  ta.focus(); onEditorInput();
+};
+
+let nameMode=null,nameTargetId=null;
+function openName(mode,title,val,targetId){
+  nameMode=mode;nameTargetId=targetId||null;
+  document.getElementById('name-modal-title').textContent=title;
+  document.getElementById('name-input').value=val||'';
+  document.getElementById('name-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('name-input').focus(),120);
+}
+window.openNewStory=function(){openName('newStory','Nova priča','')};
+window.openNewChapter=function(){const s=story(curStory);openName('newChapter','Novo poglavlje','Glava '+((s?.chapters.length||0)+1))};
+window.closeNameModal=function(){document.getElementById('name-modal').classList.remove('open')};
+window.closeNameOutside=function(e){if(e.target===document.getElementById('name-modal'))closeNameModal()};
+window.confirmName=function(){
+  const val=document.getElementById('name-input').value.trim();if(!val)return;
+  if(nameMode==='newStory'){const id=uid();data.stories.unshift({id,title:val,chapters:[]});save();closeNameModal();openStory(id)}
+  else if(nameMode==='newChapter'){const s=story(curStory);const id=uid();s.chapters.push({id,title:val,text:''});save();closeNameModal();openChapter(id)}
+  else if(nameMode==='renameStory'){const s=story(nameTargetId);if(s)s.title=val;save();closeNameModal();renderLibrary();if(view==='chapters'&&curStory===nameTargetId)show('chapters')}
+  else if(nameMode==='renameChapter'){const ch=chapter(story(curStory),nameTargetId);if(ch)ch.title=val;save();closeNameModal();renderChapters();if(view==='editor'&&curChapter===nameTargetId)show('editor')}
+};
+
+window.openImport=function(){
+  const s=story(curStory);
+  document.getElementById('import-title').value='Glava '+((s?.chapters.length||0)+1);
+  document.getElementById('import-text').value='';
+  document.getElementById('import-modal').classList.add('open');
+};
+window.closeImportModal=function(){document.getElementById('import-modal').classList.remove('open')};
+window.closeImportOutside=function(e){if(e.target===document.getElementById('import-modal'))closeImportModal()};
+window.confirmImport=function(){
+  const title=document.getElementById('import-title').value.trim()||'Bez naziva';
+  const text=document.getElementById('import-text').value;
+  if(!text.trim()){closeImportModal();return}
+  const s=story(curStory);const id=uid();s.chapters.push({id,title,text});save();closeImportModal();renderChapters();bumpStreak();
+};
+
+let sheetType=null,sheetId=null;
+window.openSheet=function(type,id){sheetType=type;sheetId=id;document.getElementById('sheet').classList.add('open')};
+window.closeSheet=function(){document.getElementById('sheet').classList.remove('open')};
+window.closeSheetOutside=function(e){if(e.target===document.getElementById('sheet'))closeSheet()};
+window.sheetRename=function(){
+  closeSheet();
+  if(sheetType==='story'){const s=story(sheetId);openName('renameStory','Preimenuj priču',s?.title,sheetId)}
+  else{const ch=chapter(story(curStory),sheetId);openName('renameChapter','Preimenuj poglavlje',ch?.title,sheetId)}
+};
+window.sheetExport=function(fmt){
+  closeSheet();
+  if(sheetType==='story'){const s=story(sheetId);if(s){doExport(fmt,s.title,storyToHtml(s),storyToMd(s))}}
+  else{const ch=chapter(story(curStory),sheetId);if(ch){doExport(fmt,ch.title,chapterToHtml(ch),chapterToMd(ch))}}
+};
+window.sheetDelete=function(){
+  closeSheet();delType=sheetType;delId=sheetId;
+  const name=(sheetType==='story')?story(sheetId)?.title:chapter(story(curStory),sheetId)?.title;
+  document.getElementById('del-modal-title').textContent=`Obrisati „${name}"?`;
+  document.getElementById('del-modal').classList.add('open');
+};
+
+let delType=null,delId=null;
+window.closeDelModal=function(){document.getElementById('del-modal').classList.remove('open')};
+window.closeDelOutside=function(e){if(e.target===document.getElementById('del-modal'))closeDelModal()};
+window.confirmDelete=function(){
+  if(delType==='story'){data.stories=data.stories.filter(s=>s.id!==delId);save();closeDelModal();renderLibrary()}
+  else{const s=story(curStory);s.chapters=s.chapters.filter(c=>c.id!==delId);save();closeDelModal();renderChapters()}
+};
+
+function chapterToMd(ch){return '## '+ch.title+'\n\n'+(ch.text||'').trim()+'\n'}
+function storyToMd(s){let md='# '+s.title+'\n\n';s.chapters.forEach(ch=>{md+='## '+ch.title+'\n\n'+(ch.text||'').trim()+'\n\n'});return md.trim()+'\n'}
+
+/* ---- Markdown -> HTML (bold/kurziv) ---- */
+function mdInline(s){
+  s=esc(s);
+  s=s.replace(/\*\*([^*\n]+?)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*([^*\n]+?)\*/g,'<em>$1</em>');
+  return s;
+}
+function txtToParas(t){
+  return (t||'').trim().split(/\n\s*\n/).map(p=>'<p>'+mdInline(p).replace(/\n/g,'<br>')+'</p>').join('');
+}
+function chapterToHtml(ch){return '<h2>'+esc(ch.title)+'</h2>'+txtToParas(ch.text)}
+function storyToHtml(s){let h='';s.chapters.forEach((ch,i)=>{h+=(i>0?'<div class="pb"></div>':'')+'<h2>'+esc(ch.title)+'</h2>'+txtToParas(ch.text)});return h}
+
+function exportPdf(title,bodyHtml){
+  const w=window.open('','_blank');
+  if(!w){alert('Dozvoli iskačuće prozore da bi izvezao PDF');return}
+  w.document.write(`<!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><title>${esc(title)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    @page{margin:2.4cm 2.1cm}
+    *{box-sizing:border-box}
+    body{font-family:'EB Garamond',Georgia,serif;color:#1d1a16;line-height:1.72;font-size:12.5pt;margin:0}
+    h1{font-family:'Cinzel',serif;font-size:26pt;text-align:center;margin:.2em 0 .25em;font-weight:700;letter-spacing:.02em;line-height:1.2}
+    .sub{font-family:'Cinzel',serif;text-align:center;color:#9a7a3a;font-size:10pt;letter-spacing:.35em;text-transform:uppercase;margin-bottom:2.8em}
+    .rule{width:60px;height:2px;background:#c9a55c;margin:0 auto 2.6em}
+    h2{font-family:'Cinzel',serif;font-size:15pt;margin:1.8em 0 .7em;font-weight:600;letter-spacing:.02em;color:#3a2f1c}
+    p{margin:0 0 .5em;text-align:justify;text-indent:1.5em}
+    p:first-of-type,h2 + p{text-indent:0}
+    .pb{page-break-before:always}
+    @media print{.noprint{display:none}}
+    .noprint{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#c9a55c;color:#1a1610;border:none;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:600;font-family:sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:99}
+  </style></head><body>
+  <button class="noprint" onclick="window.print()">📄 Sačuvaj kao PDF</button>
+  <h1>${esc(title)}</h1>
+  <div class="sub">Pisalnica</div>
+  <div class="rule"></div>
+  ${bodyHtml}
+  <script>setTimeout(()=>window.print(),700)<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+function exportWord(title,bodyHtml){
+  const html=`<!DOCTYPE html><html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset="utf-8"><title>${esc(title)}</title>
+<style>
+body{font-family:Georgia,'Times New Roman',serif;font-size:12pt;line-height:1.6;color:#1a1a1a}
+h1{text-align:center;font-size:22pt;margin:0 0 .2em}
+.sub{text-align:center;color:#9a7a3a;font-size:10pt;letter-spacing:.2em;text-transform:uppercase;margin-bottom:2em}
+h2{font-size:15pt;margin:1.6em 0 .6em}
+p{text-align:justify;text-indent:1.4em;margin:0 0 .4em}
+.pb{page-break-before:always}
+</style></head><body>
+<h1>${esc(title)}</h1><div class="sub">Pisalnica</div>
+${bodyHtml}</body></html>`;
+  downloadBlob(safeName(title)+'.doc','﻿'+html,'application/msword');
+}
+
+function doExport(fmt,title,bodyHtml,mdText){
+  if(fmt==='pdf')exportPdf(title,bodyHtml);
+  else if(fmt==='doc')exportWord(title,bodyHtml);
+  else download(safeName(title)+'.md',mdText);
+}
+
+function download(filename,text){ downloadBlob(filename,text,'text/markdown'); }
+function downloadBlob(filename,content,type){
+  const blob=new Blob([content],{type:type+';charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function safeName(s){return (s||'tekst').replace(/[^\p{L}\p{N} _-]/gu,'').trim().replace(/\s+/g,'_')||'tekst'}
+window.exportStory=function(fmt){const s=story(curStory);if(!s)return;doExport(fmt,s.title,storyToHtml(s),storyToMd(s))};
+window.exportAll=function(){if(!data.stories.length)return;let md='';data.stories.forEach(s=>{md+=storyToMd(s)+'\n---\n\n'});download('Pisalnica_'+todayStr()+'.md',md.trim()+'\n')};
+
+window.setTheme=function(t){data.theme=t;save();applyTheme()};
+function applyTheme(){
+  document.body.classList.remove('sepia','paper');
+  if(data.theme==='sepia')document.body.classList.add('sepia');
+  if(data.theme==='paper')document.body.classList.add('paper');
+  ['dark','sepia','paper'].forEach(t=>document.getElementById('theme-'+t).classList.toggle('active',data.theme===t||(t==='dark'&&!data.theme)));
+  const meta=document.querySelector('meta[name=theme-color]');
+  if(meta)meta.content=getComputedStyle(document.body).getPropertyValue('--bg').trim();
+}
+
+/* ---- Kafana „Kod Helene" ---- */
+const kFlase={
+  recenice:[
+    "Kazaljka je prešla tri ujutru, a nijedan od nas dvojice nije imao kuda da ode.",
+    "Sahranili smo ga u utorak, a u sredu je stigla njegova razglednica iz Grčke.",
+    "Konobarica je znala moje ime, a ja sam dolazio dovoljno dugo da znam da to nije kompliment.",
+    "Poslednji autobus je otišao, i to je bila najbolja stvar koja mi se desila te godine.",
+    "Otac mi je ostavio sat koji ne radi i savet koji radi previše dobro.",
+    "Pas je čekao ispred kafane četiri godine. Onda je jedne noći jednostavno ušao.",
+    "Pisala je samo kad je bila pijana, pa su joj pisma stizala iskrena.",
+    "Niko ne primeti kad čovek odustane. To se ne desi naglo, kao pad. Desi se kao curenje.",
+    "Komšija je svirao harmoniku svake noći u dva. Kad je umro, niko od nas nije mogao da spava.",
+    "Prodao sam očev pištolj da platim njenu kartu u jednom pravcu. Oboje smo dobro prošli.",
+    "U bolničkoj čekaonici svi smo jednaki: svi lažemo da je sve u redu.",
+    "Zima te godine nije dolazila. Čekali smo je kao dug koji mora da se vrati."
+  ],
+  likovi:[
+    "Bivši bokser koji plače na tuđim sahranama — za pare, ali poslednjih meseci i besplatno.",
+    "Žena koja svake večeri postavlja sto za dvoje, već sedam godina.",
+    "Taksista koji pamti svaku ispovest, a svoju nije nikome rekao.",
+    "Sveštenik koji je izgubio veru, ali ne i parohiju — jer ljudi ne traže Boga, traže nekog da ih sasluša.",
+    "Kockar koji uvek pobeđuje, i upravo zato nema nikoga.",
+    "Devojka sa železničke stanice koja prodaje cveće mrtvima i živima po istoj ceni.",
+    "Starac koji svaki dan piše pismo, i svaki dan ga pocepa pre potpisa.",
+    "Konobar koji zna tačno kad će ko da zaplače — po tome šta poruči.",
+    "Pesnik koji nikad ništa nije objavio, jer mu je strah veći od dara, a dar nije mali.",
+    "Medicinska sestra noćne smene koja umire od istog onoga od čega čuva druge."
+  ],
+  pitanja:[
+    "Da li je gore izdati nekoga, ili gledati kako sebe izdaje — i ćutati?",
+    "Koliko puta čovek može da počne ispočetka pre nego što ispočetka postane laž?",
+    "Šta bi rekao sebi od pre deset godina — i da li bi te onaj uopšte slušao?",
+    "Da li su naši mrtvi onakvi kakvi su bili, ili onakvi kakvima ih pamtimo da bismo mogli da spavamo?",
+    "Ako bol pravi pisce, koliko bi platio da nikad nisi naučio da pišeš?",
+    "Šta je teže oprostiti: ono što su ti uradili, ili ono što si dozvolio?",
+    "Kad poslednji put nisi glumio ništa — ni za koga, ni sebi?",
+    "Da li je nada vrlina ili samo navika koje se nismo otarasili?",
+    "Šta od tebe ostane kad svi koji te pamte odu?",
+    "Da li je samoća kazna ili odgovor?"
+  ]
+};
+const kKomentari=[
+  "Ovu ne sipam svakome.",
+  "Polako s tim, jaka je.",
+  "Vidi ga, došao po inspiraciju ko drugi po rakiju.",
+  "Ako te ne preseče, sledeća je dupla.",
+  "Tu sam do zore. Ne žuri.",
+  "Pij polako, piši brzo.",
+  "Ova flaša je dugo stajala. Taman je.",
+  "Ne gledaj mene, ja samo sipam — ti pišeš.",
+  "Kuca ti se priča, vidim po pogledu.",
+  "Posle pete ne odgovaram za to šta napišeš.",
+  "Ovo su pili bolji od tebe. I gori. Isti ukus.",
+  "Račun ide na priču. Ako je napišeš."
+];
+let kRedovi={},kPopijeno=0,kTrenutna='';
+function kPromesaj(n){const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+window.sipaj=function(kat){
+  if(!kRedovi[kat]||!kRedovi[kat].length)kRedovi[kat]=kPromesaj(kFlase[kat].length);
+  kTrenutna=kFlase[kat][kRedovi[kat].pop()];
+  const t=document.getElementById('kTekst'),h=document.getElementById('kHelena');
+  t.style.opacity=0;h.style.opacity=0;
+  setTimeout(()=>{
+    t.textContent='„'+kTrenutna+'“';t.style.opacity=1;
+    h.innerHTML='<span class="hname">Helena</span>'+kKomentari[Math.floor(Math.random()*kKomentari.length)];
+    h.style.opacity=1;
+  },280);
+  kPopijeno++;
+  document.getElementById('kBrojac').textContent='popijeno: '+kPopijeno;
+  document.getElementById('kCopy').style.display='inline-block';
+  document.getElementById('kRazradi').style.display='inline-block';
+};
+window.kKopiraj=function(){
+  if(!kTrenutna)return;
+  const b=document.getElementById('kCopy');
+  const done=()=>{b.textContent='✓ u džepu';setTimeout(()=>{b.textContent='⎘ Prepiši'},1400)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(kTrenutna).then(done).catch(done)}
+  else done();
+};
+window.kRazradi=function(){
+  if(!kTrenutna)return;
+  const poruka='Helena, sipala si mi ovo u kafani u Pisalnici: „'+kTrenutna+'“ — hajde da razradimo priču iz toga.';
+  window.open('https://claude.ai/new?q='+encodeURIComponent(poruka),'_blank');
+};
+
+/* ---- Instalacija (PWA) ---- */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('installBtn');if(b)b.style.display='block'});
+window.doInstall=async function(){if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;const b=document.getElementById('installBtn');if(b)b.style.display='none'};
+window.addEventListener('appinstalled',()=>{const b=document.getElementById('installBtn');if(b)b.style.display='none'});
+
+applyTheme();renderLibrary();show('library');
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/Aplikacije/pisanje/sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
