@@ -1,4 +1,4 @@
-const CACHE='pisalnica-v6';
+const CACHE='pisalnica-v7';
 const ASSETS=['/Aplikacije/pisanje/','/Aplikacije/pisanje/index.html','/Aplikacije/pisanje/manifest.json','/Aplikacije/pisanje/icon-192.png','/Aplikacije/pisanje/icon-512.png','/Aplikacije/pisanje/icon-maskable.png'];
 
 self.addEventListener('install',e=>{
