@@ -315,7 +315,7 @@ da.onclick=()=>korak(l,k+1);
 if(s.t==='deo'){
 da.onclick=()=>korak(l,k+1);
 document.getElementById('primedba').onclick=async()=>{const t=prompt('Šta fali, šta je višak ili šta nije tačno? (ide u plan za doradu)');if(!t||!t.trim())return;await baza.pisi('primedbe/'+Date.now(),{lekcija:l.id,deo:l.delovi[s.i].n,tekst:t.trim(),datum:sad()});poruka('Primedba zapisana.');zaHelenu()};
-document.getElementById('dublje').onclick=async()=>{await baza.pisi('dublje/'+Date.now(),{lekcija:l.id,deo:l.delovi[s.i].n,datum:sad()});poruka(SA_HELENOM?'Zapisano — Helena će videti.':'Zapisano.');zaHelenu()};
+document.getElementById('dublje').onclick=async()=>{await baza.pisi('dublje/'+l.id+'_'+s.i,{lekcija:l.id,deo:l.delovi[s.i].n,datum:sad()});poruka(SA_HELENOM?'Zapisano — Helena će videti.':'Zapisano.');zaHelenu()};
 }
 if(s.t==='pr'){
 $app.querySelectorAll('.opc').forEach(b=>b.onclick=async()=>{const i=+b.dataset.i;ekran.izbor=i;
@@ -384,7 +384,7 @@ propustio:pl.kljucno.filter((x,i)=>!imao[i]),
 pitanja:pl.razgovor.map((p,i)=>({p,odgovor:(z.odgovori||{})[i]||''})),
 komentar_upisan:!!komentar(pl.id)};
 }
-const dub=Object.values(S.dublje||{}).slice(-5);
+const dub=Object.values(Object.fromEntries(Object.values(S.dublje||{}).sort((a,b)=>String(a.datum).localeCompare(String(b.datum))).map(x=>[x.lekcija+'|'+x.deo,x]))).sort((a,b)=>String(a.datum).localeCompare(String(b.datum))).slice(-5);
 const prim=Object.values(S.primedbe||{}).slice(-10);
 await baza.pisi('za_helenu',{uputstvo:UPUTSTVO,azurirano:sad(),
 predjeno:`${zav.length}/${SVE.length}`,

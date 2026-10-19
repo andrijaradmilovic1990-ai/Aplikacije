@@ -12,8 +12,8 @@ Budžet nije ovde — ima svoj repo **Budzet**.
 
 ## Kako radi
 
-- Fajlovi se objavljuju preko GitHub Pages (`https://andrijaradmilovic1990-ai.github.io/Aplikacije/<folder>/`). Telefon ih otvara na **svojoj** adresi: Cloudflare worker (`skola-app`, `brzi-app`) samo prenosi fajlove sa Pages. Razlog: telefon ne pušta dve instalirane aplikacije sa iste adrese. Na github.io stranica sama preusmerava na svoju adresu (osim sa `?proba`).
-- Podaci: ista Firebase baza i ista Google prijava kao Budžet (`budzet-f3992`). Nova adresa mora u Firebase → Authentication → Authorized domains.
+- Fajlovi se objavljuju preko GitHub Pages (`https://andrijaradmilovic1990-ai.github.io/Aplikacije/<folder>/`). Telefon ih otvara na **svojoj** adresi: Cloudflare worker (`skola-app`, `brzi-app`, `pisanje-app`) samo prenosi fajlove sa Pages. Razlog: telefon ne pušta dve instalirane aplikacije sa iste adrese. Na github.io stranica sama preusmerava na svoju adresu (osim sa `?proba`).
+- Podaci: Škola i Brzi unos — ista Firebase baza i ista Google prijava kao Budžet (`budzet-f3992`). Pisalnica čuva tekstove samo u telefonu (bez baze). Nova adresa mora u Firebase → Authentication → Authorized domains.
 - Menja se SAMO ovde, u repou; worker se ne dira.
 
 ## Nova aplikacija
