@@ -20,7 +20,7 @@
 | `skola/stanje` | aplikacija | gde je stao `{lekcija, korak}` |
 | `skola/lekcije/<id>` | aplikacija | pogodak, provere, prisećanje, odgovori, `zavrseno` |
 | `skola/kartice/<lekcija>_<i>` | aplikacija | `{kutija, sledece, poslednje, znao}` |
-| `skola/dublje/<ts>` | aplikacija | „Hoću više o ovome" |
+| `skola/dublje/<lekcija>_<deo>` | aplikacija | „Hoću više o ovome" — jedan zapis po delu lekcije (stari zapisi imaju ključ po vremenu; `za_helenu` ih spaja) |
 | `skola/primedbe/<ts>` | aplikacija | „Imam primedbu" `{lekcija, deo, tekst, datum}` |
 | `skola/za_helenu` | aplikacija | sažetak za asistenta (~2.400 znakova), osvežava se sam |
 | `skola/komentari/<id>` | asistent | `{datum, tekst}` — vidi se u aplikaciji |
