@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<script>/* svaka aplikacija ima svoju adresu (telefon ne pušta dve sa iste) */if(location.hostname.endsWith('github.io')&&!/[?&]proba/.test(location.search))location.replace('https://kuca-app.andrija-radmilovic1990.workers.dev'+location.pathname+location.search+location.hash);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d78">
+<title>Kuća</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/House%20with%20garden/3D/house_with_garden_3d.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* gore spisak soba, ispod scena izabrane sobe levo (bez plafona) i stavke desno; na telefonu scena gore, stavke ispod */
+
+:root{
+  --bg:#eef1f2; --paper:#f8fafa; --ink:#1d2a30; --muted:#5d6c73; --line:#b9c6cc; --grid:#dde5e8;
+  --stage:#dfe6e9; --accent:#2f5d78; --done:#3f8f5a; --on:#ffffff;
+  --display:"Archivo Narrow",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141b1f; --paper:#1a2328; --ink:#e3eaed; --muted:#93a3aa; --line:#3a4a52; --grid:#222e34;
+  --stage:#1f292e; --accent:#7fb2d0; --done:#6cc28a; --on:#10181c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141b1f; --paper:#1a2328; --ink:#e3eaed; --muted:#93a3aa; --line:#3a4a52; --grid:#222e34;
+  --stage:#1f292e; --accent:#7fb2d0; --done:#6cc28a; --on:#10181c; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:16px}
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+.eyebrow{margin:0;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;margin:0;text-wrap:balance;line-height:1.15}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.9rem}
+nav.sobe{display:flex;flex-wrap:wrap;gap:8px}
+nav.sobe button{display:grid;gap:0;text-align:left;padding:7px 14px;min-width:130px}
+nav.sobe button b{font-family:var(--display);font-size:1.1rem;font-weight:700}
+nav.sobe button small{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+nav.sobe button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on)}
+nav.sobe button[aria-pressed="true"] small{color:var(--on);opacity:.85}
+.mere{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px}
+.mere dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:2px 24px;margin:0}
+.mere dl div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--grid);font-size:.9rem}
+.mere dt{color:var(--muted)}
+.mere dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.mere p{font-size:.8rem;color:var(--muted);margin:10px 0 0}
+.main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.stagebox{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:8px;overflow:hidden;height:min(70vh,600px);min-height:360px;touch-action:none}
+.stagebox canvas{display:block;width:100%;height:100%}
+.views{position:absolute;left:10px;top:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{position:absolute;right:10px;bottom:8px;font-size:.75rem;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:4px;opacity:.9}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:16px;min-width:0}
+h3{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+label.tog{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:.9rem}
+label.tog input{accent-color:var(--done);width:16px;height:16px}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+label.step{display:flex;gap:10px;align-items:flex-start;padding:6px 8px;border-radius:6px;cursor:pointer}
+label.step:hover{background:var(--grid)}
+label.step input{margin-top:3px;accent-color:var(--done);width:16px;height:16px;flex:none}
+label.step small{display:block;color:var(--muted);font-size:.8rem}
+.state{font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;color:var(--accent);margin:0 0 4px}
+.err{padding:20px;color:var(--muted)}
+li.item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 8px;border-bottom:1px solid var(--grid);padding-bottom:4px}
+li.item .price{font-family:var(--mono);font-size:.85rem;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+li.item .mark,li.item .tag{grid-column:2;justify-self:end;font-size:.75rem;padding:2px 8px}
+li.item .tag{color:var(--muted)}
+li.item.done .price{color:var(--done)}
+li.item.done .mark{color:var(--done);border-color:var(--done)}
+.sum{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;justify-content:space-between;margin-top:10px;font-size:.9rem}
+.sum strong{font-family:var(--mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.sum small{flex-basis:100%;color:var(--muted);font-size:.8rem;text-align:right}
+.kuca{border-top:1px solid var(--line);padding-top:10px}
+.kuca .sum{margin-top:0}
+*{box-sizing:border-box}
+body{margin:0}
+.wrap{padding-top:max(20px,env(safe-area-inset-top,0px))}
+.gate{position:fixed;inset:0;z-index:10;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden],.wrap[hidden]{display:none}
+.gate div{max-width:320px;width:100%;text-align:center;display:grid;gap:14px}
+.gate h1{font-size:2.4rem}
+.gate p{margin:0;color:var(--muted);font-size:.9rem}
+.gate button{padding:12px;font-size:1rem;font-weight:600;background:var(--accent);border-color:var(--accent);color:var(--on)}
+.gate .greska{color:#c0392b;min-height:1.2em}
+.ko{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="gate" id="gate" hidden>
+  <div>
+    <h1>Kuća</h1>
+    <p>Renoviranje gornje kuće. Ulaze samo članovi kuće.</p>
+    <button type="button" id="prijava">Prijavi se Google nalogom</button>
+    <p class="greska" id="greska"></p>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <div class="top">
+    <div>
+      <p class="eyebrow">Gornja kuća</p>
+      <h1 id="naslov">Kuća</h1>
+      <p class="sub" id="podnaslov"></p>
+    </div>
+    <nav class="sobe" id="sobe" aria-label="Sobe"></nav>
+  </div>
+
+  <div class="main">
+    <div class="stagebox" id="stage">
+      <div class="views" id="views"></div>
+      <div class="hint">prevuci da okreneš · štipni za zum</div>
+    </div>
+
+    <div class="panel">
+      <div>
+        <h3 id="naslov-stavke">Šta ide u sobu</h3>
+        <div class="state" id="rstate"></div>
+        <ul id="stavke"></ul>
+        <div class="sum" id="suma"></div>
+      </div>
+      <div class="kuca" id="kuca"></div>
+      <div class="row">
+        <label class="tog"><input type="checkbox" id="furn"> Nameštaj</label>
+      </div>
+    </div>
+  </div>
+  <section class="mere">
+    <h3>Mere sobe</h3>
+    <dl id="mere"></dl>
+    <p id="mere-napomena"></p>
+  </section>
+  <div class="ko"><span id="ko"></span><button type="button" id="odjava">Odjavi se</button></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// 3D i spisak; podatke daje api (Firebase posle prijave)
+window.kucaStart=function(api){
+
+const stage=document.getElementById("stage");
+if(!window.THREE||!THREE.OrbitControls){stage.insertAdjacentHTML("beforeend",'<p class="err">3D biblioteka nije stigla. Osveži stranicu.</p>');return}
+let H=0;const T=0.15;
+const $=id=>document.getElementById(id);
+
+// --- stanje (samo u ovom pregledaču): nameštaj, poslednja soba, štikle prikaza
+let st={namestaj:1,soba:"dnevna"},shown={};
+try{const s=JSON.parse(localStorage.getItem("kuca3d")||"{}");Object.assign(st,s)}catch(e){}
+try{shown=JSON.parse(localStorage.getItem("kuca3d-prikaz")||"{}")}catch(e){}
+function save(){try{localStorage.setItem("kuca3d",JSON.stringify(st))}catch(e){}}
+
+// --- scena (zajednička za sve sobe; soba se gradi u svojoj grupi i menja se na klik)
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(45,1,0.05,120);
+const ren=new THREE.WebGLRenderer({antialias:true});
+ren.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
+ren.outputEncoding=THREE.sRGBEncoding;
+stage.prepend(ren.domElement);
+const ctl=new THREE.OrbitControls(cam,ren.domElement);
+ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI/2-0.02;ctl.minDistance=0.6;
+
+function bg(){const c=getComputedStyle(document.documentElement).getPropertyValue("--stage").trim()||"#dfe6e9";scene.background=new THREE.Color(c)}
+bg();
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",bg)}catch(e){}
+new MutationObserver(bg).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8a86,0.6));
+const sun=new THREE.DirectionalLight(0xfff1dc,0.95);
+sun.target.position.set(0,0,0);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-0.0008;
+scene.add(sun,sun.target);
+const fill=new THREE.DirectionalLight(0xdfe8ff,0.3);scene.add(fill);
+
+// --- teksture iz platna
+function canvasTex(size,draw,rx,ry){const c=document.createElement("canvas");c.width=c.height=size;const x=c.getContext("2d");draw(x,size);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx||1,ry||1);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return t}
+function noise(x,s,base,amp,n){x.fillStyle=base;x.fillRect(0,0,s,s);for(let i=0;i<n;i++){const v=Math.random()*amp-amp/2;x.fillStyle=`rgba(${v>0?255:0},${v>0?255:0},${v>0?255:0},${Math.abs(v)/255})`;const r=Math.random()*3+0.5;x.fillRect(Math.random()*s,Math.random()*s,r,r)}}
+const texPaint=canvasTex(128,(x,s)=>noise(x,s,"#ffffff",12,1500),4,2);texPaint.encoding=THREE.LinearEncoding;
+// svetao laminat (dnevna)
+const texLaminat=canvasTex(512,(x,s)=>{const rows=6,pw=s/rows;for(let r=0;r<rows;r++){let off=(r*173)%s;let len=0;while(len<s+260){const L=200+Math.random()*160;const t=196+Math.random()*22;
+  x.fillStyle=`rgb(${t},${t+2},${t+1})`;x.fillRect(len-off,r*pw,L,pw);x.globalAlpha=.10;for(let g=0;g<9;g++){x.fillStyle="#5d6366";x.fillRect(len-off,r*pw+Math.random()*pw,L,1+Math.random())}
+  x.globalAlpha=1;x.fillStyle="rgba(90,96,100,.45)";x.fillRect(len-off,r*pw,1.5,pw);len+=L}x.fillStyle="rgba(90,96,100,.4)";x.fillRect(0,r*pw,s,1.5)}},1.4,2.2);
+// parket na riblju kost (velika soba): kolone dasaka koso, svaka druga na drugu stranu
+const texParket=canvasTex(512,(x,s)=>{const cw=64,ph=32;for(let k=0;k<s/cw;k++)for(let r=-2;r<s/ph+2;r++){const up=k%2?-1:1,x0=k*cw,y0=r*ph+(k%2?cw/2:0);
+  const t=Math.random()*26;x.fillStyle=`rgb(${168+t},${110+t*.7},${62+t*.4})`;x.beginPath();
+  x.moveTo(x0,y0);x.lineTo(x0+cw,y0+up*cw/2);x.lineTo(x0+cw,y0+up*cw/2+ph);x.lineTo(x0,y0+ph);x.closePath();x.fill();
+  x.strokeStyle="rgba(70,40,20,.45)";x.lineWidth=1.2;x.stroke()}},3,3);
+const blind=r=>canvasTex(64,(x,s)=>{x.fillStyle="#f4f4f1";x.fillRect(0,0,s,s);x.fillStyle="rgba(120,125,128,.45)";for(let i=0;i<s;i+=4)x.fillRect(0,i,s,1)},1,r);
+const texBlind10=blind(10),texBlind12=blind(12);
+
+// --- tekuća soba
+let room=null,W=6,D=4,roomG=null,furn=null,walls=[],wallIx={};
+const wall=id=>walls[wallIx[id]];
+
+// gradnja zidova sa otvorima; ono što stoji na zidu bledi zajedno sa zidom
+function buildWall(def){
+  const mat=new THREE.MeshStandardMaterial({map:texPaint,roughness:.95,transparent:true,color:def.color});
+  const g=new THREE.Group();const extras=[];
+  const box=(w,h,cx,cy)=>{if(w<=0.001||h<=0.001)return;const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,T),mat);m.position.set(cx,cy,0);m.castShadow=m.receiveShadow=true;m.userData.wall=def.id;g.add(m)};
+  const L=-def.len/2,R=def.len/2;let cur=L;
+  [...def.holes].sort((a,b)=>a.x0-b.x0).forEach(h=>{
+    box(h.x0-cur,H,(cur+h.x0)/2,H/2);
+    const hw=h.x1-h.x0,hc=(h.x0+h.x1)/2;
+    box(hw,h.y0,hc,h.y0/2);box(hw,H-h.y1,hc,(h.y1+H)/2);cur=h.x1});
+  box(R-cur,H,(cur+R)/2,H/2);
+  g.position.set(def.pos[0],0,def.pos[1]);g.rotation.y=def.rot;roomG.add(g);
+  const face=def.in*(T/2);
+  const w={def,g,mat,extras,face,normal:new THREE.Vector3(...def.normal),center:new THREE.Vector3(g.position.x,H/2,g.position.z),op:1};
+  wallIx[def.id]=walls.length;walls.push(w);return w;
+}
+// --- sobe stižu iz baze (kuca/sobe): zidovi sa otvorima, ono što stoji na zidu, nameštaj. Nova soba = novi unos u bazi.
+const POD={laminat:texLaminat,parket:texParket},MAPA={roletna10:texBlind10,roletna12:texBlind12};
+function geom(g){const[t,...a]=g;return t==="box"?new THREE.BoxGeometry(...a):t==="plane"?new THREE.PlaneGeometry(...a):t==="torus"?new THREE.TorusGeometry(...a):t==="sphere"?new THREE.SphereGeometry(...a):new THREE.CylinderGeometry(...a)}
+function matOf(m){const o={color:m.c,roughness:m.r==null?1:m.r};if(m.mt)o.metalness=m.mt;if(m.e){o.emissive=m.e;o.emissiveIntensity=m.ei}if(m.ds)o.side=THREE.DoubleSide;if(m.map)o.map=MAPA[m.map];return new THREE.MeshStandardMaterial(o)}
+function meshOf(k){const m=new THREE.Mesh(geom(k.g),matOf(k.m));m.position.set(...k.p);if(k.rot)m.rotation.set(...k.rot);m.castShadow=true;return m}
+function roomOf(r){return Object.assign({},r,{pod:POD[r.pod]||texLaminat,zidIme:r.zidIme||{},
+  pogledi:(r.pogledi||[]).map(v=>[v.ime,v.kamera,v.cilj]),mere:(r.mere||[]).map(v=>[v.sta,v.koliko]),
+  zidovi:()=>(r.zidovi||[]).map(z=>Object.assign({},z,{holes:(z.holes||[]).map(([x0,x1,y0,y1])=>({x0,x1,y0,y1}))})),
+  gradi(){(r.naZidu||[]).forEach(k=>{const w=wall(k.zid);if(!w)return;const m=meshOf(k);m.material.transparent=true;w.g.add(m);w.extras.push({m,base:k.base==null?1:k.base})});
+   (r.komadi||[]).forEach(k=>{const m=meshOf(k);m.receiveShadow=true;furn.add(m)})}})}
+let ROOMS={},ORDER=[];
+function setRooms(data){ROOMS={};Object.keys(data||{}).sort((a,b)=>(data[a].red||0)-(data[b].red||0)).forEach(id=>ROOMS[id]=roomOf(data[id]));ORDER=Object.keys(ROOMS)}
+
+
+// --- stavke: žive u bazi (kuca/stavke, polje soba), iste za oba naloga.
+// Plan = bledo, urađeno = celo; štikla pored stavke samo pali/gasi prikaz (pamti se u ovom pregledaču).
+const WOOD=0xc8a477,bx=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+function kit(g,mats){return(geo,color,x,y,z,o)=>{const m=new THREE.MeshStandardMaterial(Object.assign({color,roughness:.8,transparent:true},o||{}));mats.push(m);const b=new THREE.Mesh(geo,m);b.position.set(x,y,z);b.castShadow=b.receiveShadow=true;g.add(b);return b}}
+// Parola (Hanah Home): 1155 × 1035 mm, dubina 145; kutije u mm od donjeg levog ugla, sa slike prodavca
+const PAROLA=[[123,771,245,264],[368,771,448,214],[0,548,458,213],[458,284,239,477],[697,497,248,264],[209,274,249,274],[697,274,458,223],[328,0,249,274],[577,50,448,224]];
+// modeli na zidu: x udesno gledano iz sobe, z ka sobi, y od dna predmeta
+const MODELS={
+ parola(p,s){const t=0.018,d=0.145,c=s.boja||0xf1f1ec;
+  PAROLA.forEach(([x,y,w,h])=>{x=x/1000-0.5775;y/=1000;w/=1000;h/=1000;const cx=x+w/2,z=d/2;
+   p(bx(w,t,d),c,cx,y+t/2,z);p(bx(w,t,d),c,cx,y+h-t/2,z);p(bx(t,h,d),c,x+t/2,y+h/2,z);p(bx(t,h,d),c,x+w-t/2,y+h/2,z)})},
+ // zidne police bez nosača: police = [[x sredine, y, širina], ...] od dna predmeta
+ police(p,s){const d=s.dubina||0.15,t=0.035;(s.police||[]).forEach(([x,y,w])=>p(bx(w,t,d),s.boja||0xf1f1ec,x,y+t/2,d/2))},
+ // peć: cev od peći do otvora dimnjaka, štediša na cevi, koleno u zid
+ pec(p){const z=0.22,M={metalness:.5,roughness:.45};
+  p(new THREE.CylinderGeometry(0.06,0.06,1.21,16),0x2b2b2b,0,1.445,z,M);
+  p(new THREE.CylinderGeometry(0.13,0.13,0.5,20),0x3a3a3a,0,1.35,z,M);
+  p(new THREE.CylinderGeometry(0.06,0.06,0.24,16),0x2b2b2b,0,2.05,z/2,M).rotation.x=Math.PI/2},
+ // stočić LOIRE: bela ploča, donja polica, bočna stranica desno, crne noge i ukrštene šipke
+ loire(p,s){const L=s.sirina||1.0,d=s.dubina||0.6,h=s.visina||0.4,t=0.025,c=0xf1f1ec,k=0x1d1d1d,M={metalness:.4,roughness:.5};
+  p(bx(L,t,d),c,0,h-t/2,0);p(bx(L-0.06,t,d-0.06),c,0,0.14,0);p(bx(t,h-0.14,d-0.06),c,L/2-0.03-t/2,0.14+(h-0.14)/2,0);
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>p(bx(0.015,h-t,0.015),k,a*(L/2-0.05),(h-t)/2,b*(d/2-0.05),M));
+  const span=L/2-0.08,dy=h-t-0.14,len=Math.hypot(span,dy),ang=Math.atan2(dy,span);
+  [-1,1].forEach(b=>[-1,1].forEach(side=>{const cx=side*(L/4-0.02);
+   p(bx(len,0.01,0.01),k,cx,0.14+dy/2,b*(d/2-0.04),M).rotation.z=ang;
+   p(bx(len,0.01,0.01),k,cx,0.14+dy/2,b*(d/2-0.04),M).rotation.z=-ang}))},
+ // laminat preko celog poda (plan = bledo preko starog poda)
+ laminat(p,s){p(bx(s.sirina||W,0.006,s.dubina||D),s.boja||0xd8c4a2,0,0.003,0,{roughness:.6})},
+ // tepih na podu: sirina po x, dubina po z
+ tepih(p,s){p(bx(s.sirina||1.8,0.015,s.dubina||1.5),s.boja||0xf5f4f0,0,0.0125,0,{roughness:1})},
+ // tabure: okruglo sedište na nozi, od = koliko je od zida
+ tabure(p,s){const z=s.od||0.7,c=s.boja||0xe8cfc8;
+  p(new THREE.CylinderGeometry(0.19,0.19,0.1,24),c,0,0.42,z);
+  p(new THREE.CylinderGeometry(0.04,0.04,0.37,12),0xd8d0c0,0,0.185,z,{metalness:.5,roughness:.4});
+  p(new THREE.CylinderGeometry(0.16,0.16,0.02,24),0xd8d0c0,0,0.01,z,{metalness:.5,roughness:.4})},
+ // tabure Geppetto: tapacirano sedište na postolju, 4 crne kose nogice; mere procenjene; od = koliko je od zida
+ geppetto(p,s){const w=s.sirina||0.75,d=s.dubina||0.55,h=s.visina||0.42,z=s.od||0,c=s.boja||0xb6b8ba,leg=0.1,b=0.17;
+  p(bx(w-0.04,b,d-0.04),c,0,leg+b/2,z,{roughness:1});
+  p(bx(w,h-leg-b,d),c,0,leg+b+(h-leg-b)/2,z,{roughness:1});
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([i,k])=>p(new THREE.CylinderGeometry(0.02,0.012,leg,10),0x1d1d1d,i*(w/2-0.07),leg/2,z+k*(d/2-0.07)))},
+ // utičnice: tacke = [[zid, x udesno gledano iz sobe, y od poda], ...]
+ uticnice(p,s){(s.tacke||[]).forEach(([z,x,y])=>{const w=wall(z);if(!w)return;w.g.updateMatrixWorld();
+  const v=w.g.localToWorld(new THREE.Vector3(w.def.in*x,y,w.face+w.def.in*0.012));
+  p(bx(0.1,0.1,0.024),s.boja||0xffffff,v.x,v.y,v.z,{roughness:.4}).rotation.y=w.g.rotation.y})},
+ kutija(p,s){const w=s.sirina||0.6,h=s.visina||0.4,d=s.dubina||0.3;p(bx(w,h,d),s.boja||WOOD,0,h/2,d/2)}
+};
+let all=[],items=[];
+const isShown=id=>shown[id]!==0;
+function dropItems(){items.forEach(it=>{it.g.parent&&it.g.parent.remove(it.g);it.g.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose()}})});items=[]}
+function buildItems(){dropItems();if(!room)return;
+ all.filter(s=>s.soba===st.soba).forEach(s=>{const g=new THREE.Group(),mats=[],p=kit(g,mats),w=s.zid in wallIx?wall(s.zid):null;
+  (MODELS[s.model]||MODELS.kutija)(p,s);
+  if(w){g.rotation.y=w.def.in===1?0:Math.PI;g.position.set(w.def.in*(s.x||0),s.y||0,w.face);w.g.add(g)}
+  else{g.position.set(s.x||0,s.y||0,s.z||0);roomG.add(g)}
+  items.push({s,g,mats,wall:w})});
+ items.forEach(itemOp)}
+function itemOp(it){const done=it.s.stanje==="gotovo",op=(done?1:0.3)*(it.wall?it.wall.op:1);
+ it.g.visible=isShown(it.s.id);it.mats.forEach(m=>{m.opacity=op;m.depthWrite=done&&op>0.9});
+ it.g.traverse(o=>{if(o.isMesh)o.castShadow=done&&op>0.5})}
+
+// --- spisak i zbirovi
+const din=n=>n.toLocaleString("sr-RS")+" din";
+const esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const otvoreno=S=>{const open=S.filter(s=>s.stanje!=="gotovo"),known=open.filter(s=>typeof s.cena==="number");
+ return{open,known,bez:open.length-known.length,zbir:known.reduce((a,s)=>a+s.cena,0),oko:known.some(s=>s.cenaOko)}};
+const bezCene=n=>n?`<small>+ ${n} ${n===1?"stavka":"stavke"} bez cene</small>`:"";
+let canWrite=true,loaded=false;
+const listEl=$("stavke"),stEl=$("rstate"),sumEl=$("suma"),kucaEl=$("kuca");
+function renderNav(){$("sobe").innerHTML=ORDER.map(id=>{const S=all.filter(s=>s.soba===id),o=otvoreno(S);
+  const n=o.open.length,info=!loaded?"…":!S.length?"bez stavki":!n?"sve urađeno":`još ${n} ${n%10===1&&n%100!==11?"stavka":[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?"stavke":"stavki"} · ${din(o.zbir)}`;
+  return `<button type="button" data-soba="${id}" aria-pressed="${id===st.soba}"><b>${esc(ROOMS[id].kratko)}</b><small>${info}</small></button>`}).join("");
+ $("sobe").querySelectorAll("[data-soba]").forEach(b=>b.onclick=()=>openRoom(b.dataset.soba))}
+function renderList(){renderNav();if(!loaded)return;
+ const S=items.map(i=>i.s),Z=room.zidIme;
+ if(!S.length){listEl.innerHTML="";sumEl.textContent="";stEl.textContent="Još nema upisanih stavki za ovu sobu."}
+ else{
+  listEl.innerHTML=S.map(s=>{const done=s.stanje==="gotovo",price=s.cena===0?"već kupljeno":typeof s.cena==="number"?(s.cenaOko?"~":"")+din(s.cena):"cena ?";
+   return `<li class="item${done?" done":""}"><label class="step"><input type="checkbox" data-show="${esc(s.id)}"${isShown(s.id)?" checked":""} aria-label="Prikaži ${esc(s.naziv)}"><span>${esc(s.naziv)}<small>${esc([s.opis,Z[s.zid]].filter(Boolean).join(" · "))}</small></span></label>
+   <span class="price">${price}</span>${canWrite?`<button class="mark" data-done="${esc(s.id)}">${done?"vrati u plan":"urađeno"}</button>`:`<span class="tag">${done?"urađeno":"plan"}</span>`}</li>`}).join("");
+  const o=otvoreno(S);
+  stEl.textContent=`${S.length-o.open.length} od ${S.length} urađeno · bledo = još nije`;
+  sumEl.innerHTML=`<span>Treba još${o.oko?" (otprilike)":""}</span><strong>${din(o.zbir)}</strong>${bezCene(o.bez)}`}
+ const k=otvoreno(all);
+ kucaEl.innerHTML=`<div class="sum"><span>Cela kuća, treba još${k.oko?" (otprilike)":""}</span><strong>${din(k.zbir)}</strong>${bezCene(k.bez)}</div>`;
+ listEl.querySelectorAll("[data-show]").forEach(el=>el.onchange=()=>{shown[el.dataset.show]=el.checked?1:0;try{localStorage.setItem("kuca3d-prikaz",JSON.stringify(shown))}catch(e){}items.forEach(itemOp);renderList()});
+ listEl.querySelectorAll("[data-done]").forEach(el=>el.onclick=async()=>{const s=S.find(x=>x.id===el.dataset.done);el.disabled=true;
+  try{await api.setStanje(s.id,s.stanje==="gotovo"?"plan":"gotovo")}
+  catch(e){el.disabled=false;stEl.textContent="Nije sačuvano, probaj ponovo."}})}
+
+// --- otvaranje sobe: stara se skloni, nova se sagradi
+function clearRoom(){dropItems();if(roomG){scene.remove(roomG);roomG.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose()}})}walls=[];wallIx={}}
+function openRoom(id){if(!ROOMS[id])id=ORDER[0];
+ clearRoom();st.soba=id;save();room=ROOMS[id];W=room.W;D=room.D;H=room.visina;
+ try{history.replaceState(null,"","#"+id)}catch(e){}
+ roomG=new THREE.Group();scene.add(roomG);furn=new THREE.Group();roomG.add(furn);
+ room.zidovi().forEach(buildWall);room.gradi();
+ // pod i podloga
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(W,D),new THREE.MeshStandardMaterial({map:room.pod,roughness:.72}));
+ floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;roomG.add(floor);
+ const ground=new THREE.Mesh(new THREE.CircleGeometry(room.krug,48),new THREE.ShadowMaterial({opacity:.16}));
+ ground.rotation.x=-Math.PI/2;ground.position.y=-0.005;ground.receiveShadow=true;roomG.add(ground);
+ const base=new THREE.Mesh(new THREE.BoxGeometry(W+2*T+0.1,0.08,D+2*T+0.1),new THREE.MeshStandardMaterial({color:0x8d8a84,roughness:1}));
+ base.position.y=-0.045;base.receiveShadow=true;roomG.add(base);
+ // svetlo i kamera po sobi
+ sun.position.set(...room.sun);fill.position.set(...room.fill);const s=room.senka;
+ Object.assign(sun.shadow.camera,{left:-s,right:s,top:s,bottom:-s,near:1,far:25});sun.shadow.camera.updateProjectionMatrix();
+ ctl.maxDistance=room.maxDist;anim=null;cam.position.set(...room.iso);ctl.target.set(0,0.9,0);
+ // tekst
+ $("naslov").textContent=room.naziv;$("podnaslov").textContent=room.sub;$("naslov-stavke").textContent="Šta ide u "+room.u;
+ $("mere").innerHTML=room.mere.map(([a,b])=>`<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join("");$("mere-napomena").textContent=room.napomena;
+ const views=[["Iskosa",room.iso,[0,0.9,0]],["Odozgo",[0,room.top,0.01],[0,0,0]],...room.pogledi];
+ $("views").innerHTML=views.map(([n],i)=>`<button type="button" data-v="${i}">${esc(n)}</button>`).join("");
+ $("views").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const v=views[+b.dataset.v];go(v[1],v[2])});
+ applyFurn();buildItems();renderList()}
+
+function applyFurn(){if(furn)furn.visible=!!st.namestaj;$("furn").checked=!!st.namestaj}
+$("furn").onchange=e=>{st.namestaj=e.target.checked?1:0;save();applyFurn()};
+
+// --- kamera
+let anim=null;
+function fly(p,t){anim={p0:cam.position.clone(),t0:ctl.target.clone(),p1:new THREE.Vector3(...p),t1:new THREE.Vector3(...t),k:0}}
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function go(p,t){if(reduce){cam.position.set(...p);ctl.target.set(...t)}else fly(p,t)}
+
+function resize(){const r=stage.getBoundingClientRect();ren.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(r.height,1);cam.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(stage);resize();
+
+const v=new THREE.Vector3();
+function loop(){
+  requestAnimationFrame(loop);
+  if(anim){anim.k=Math.min(1,anim.k+0.035);const e=1-Math.pow(1-anim.k,3);cam.position.lerpVectors(anim.p0,anim.p1,e);ctl.target.lerpVectors(anim.t0,anim.t1,e);if(anim.k>=1)anim=null}
+  ctl.update();
+  walls.forEach(w=>{v.subVectors(cam.position,w.center);const out=v.dot(w.normal)>0;const target=out?0.1:1;w.op+=(target-w.op)*0.15;
+    w.mat.opacity=w.op;w.mat.depthWrite=w.op>0.9;
+    w.extras.forEach(x=>{x.m.material.opacity=x.base*w.op;x.m.material.depthWrite=w.op>0.9&&x.base>=1;x.m.castShadow=w.op>0.5})});
+  items.forEach(it=>{if(it.wall)itemOp(it)});
+  ren.render(scene,cam);
+}
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(ROOMS[h]&&h!==st.soba)openRoom(h)});
+
+// --- pokretanje: prvo sobe, pa stavke uživo
+stEl.textContent="Učitavam kuću…";
+api.sobe().then(data=>{setRooms(data);
+ if(!ORDER.length){stEl.textContent="U bazi još nema soba.";return}
+ const h=(location.hash||"").slice(1);openRoom(ROOMS[h]?h:st.soba);loop();stEl.textContent="Učitavam stavke…";
+ api.stavke(obj=>{all=Object.keys(obj||{}).map(id=>Object.assign({id},obj[id])).sort((a,b)=>(a.red||0)-(b.red||0));loaded=true;buildItems();renderList()},
+  ()=>{stEl.textContent="Stavke trenutno ne mogu da se učitaju. Osveži stranicu."})})
+ .catch(()=>{stEl.textContent="Kuća trenutno ne može da se učita. Osveži stranicu."});
+};
+</script>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {getDatabase,ref,get,set,onValue} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,setPersistence,browserLocalPersistence,signOut} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+// ista baza i ista prijava kao Budžet; kuća živi samo pod kuca/
+const app=initializeApp({
+apiKey:"AIzaSyDI03DXl54GvRv99Ywb0-53rI1dhsYM18c",
+authDomain:"budzet-f3992.firebaseapp.com",
+projectId:"budzet-f3992",
+databaseURL:"https://budzet-f3992-default-rtdb.europe-west1.firebasedatabase.app",
+storageBucket:"budzet-f3992.firebasestorage.app",
+messagingSenderId:"633902520397",
+appId:"1:633902520397:web:1488ffe3d9626a8c586404"
+});
+const db=getDatabase(app),auth=getAuth(app),google=new GoogleAuthProvider();
+const $=id=>document.getElementById(id);
+const api={
+ sobe:()=>get(ref(db,'kuca/sobe')).then(s=>s.val()),
+ stavke:(cb,err)=>onValue(ref(db,'kuca/stavke'),s=>cb(s.val()),err),
+ setStanje:(id,v)=>set(ref(db,`kuca/stavke/${id}/stanje`),v)
+};
+function greska(e){const c=(e&&e.code)||'';
+ $('greska').textContent=c==='auth/unauthorized-domain'?'Ova adresa još nije dozvoljena u Firebase-u.':c==='auth/popup-blocked'?'Pregledač je blokirao prozor za prijavu.':c==='auth/network-request-failed'?'Nema internet konekcije.':c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?'Ovaj nalog nema pristup kući.':((e&&e.message)||'Greška pri prijavi.')}
+$('prijava').onclick=async()=>{$('greska').textContent='';
+ try{await signInWithPopup(auth,google)}catch(e){const c=(e&&e.code)||'';
+  if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'){try{await signInWithRedirect(auth,google)}catch(e2){greska(e2)}}
+  else if(c!=='auth/popup-closed-by-user'&&c!=='auth/cancelled-popup-request')greska(e)}};
+$('odjava').onclick=()=>signOut(auth).then(()=>location.reload());
+setPersistence(auth,browserLocalPersistence).catch(()=>{});
+getRedirectResult(auth).catch(greska);
+let started=false;
+onAuthStateChanged(auth,user=>{
+ if(!user){$('gate').hidden=false;$('app').hidden=true;return}
+ // provera pristupa pre crtanja: tuđ nalog ostaje na vratima
+ get(ref(db,'kuca/sobe')).then(()=>{$('gate').hidden=true;$('app').hidden=false;$('ko').textContent='Nalog: '+(user.email||'');
+  if(!started){started=true;window.kucaStart(api)}})
+ .catch(e=>{$('gate').hidden=false;$('app').hidden=true;greska(e);signOut(auth)})});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
