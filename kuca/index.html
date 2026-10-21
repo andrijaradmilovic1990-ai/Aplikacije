@@ -408,10 +408,10 @@ async function otvoriFioku(ime){const z=++fiokaZahtev;
   fLi.innerHTML=S.map(r=>{const stat=c(r,"STATUS"),kl=/^URADJENO/i.test(stat)?" uradjeno":/^PROBIJENO/i.test(stat)?" probijeno":"";
    return `<li><span>${esc(c(r,"STA"))}<small>rok ${esc(c(r,"ROK")||"—")} · podsetnik od ${esc(c(r,"PODSETNIK OD")||"—")}</small></span><span class="st${kl}">${esc(stat||"—")}</span></li>`}).join("")}
  catch(e){if(z===fiokaZahtev)fSt.textContent="Fioka trenutno ne može da se otvori ("+(e.message||"greška")+"). Probaj ponovo."}}
-// dodir (ne prevlačenje) na komad sa fiokom
+// dodir (ne prevlačenje) na komad sa fiokom; na "click", jer bi posle dodira prstom click pao na pozadinu prozora i odmah ga zatvorio
 const ray=new THREE.Raycaster(),tacka=new THREE.Vector2();let dole=null;
 ren.domElement.addEventListener("pointerdown",e=>{dole={x:e.clientX,y:e.clientY,t:Date.now()}});
-ren.domElement.addEventListener("pointerup",e=>{if(!dole)return;const d=dole;dole=null;
+ren.domElement.addEventListener("click",e=>{if(!dole)return;const d=dole;dole=null;
  if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>8||Date.now()-d.t>600||!fiokaMesh.length||!furn.visible)return;
  const r=ren.domElement.getBoundingClientRect();tacka.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
  ray.setFromCamera(tacka,cam);const hit=ray.intersectObjects(fiokaMesh,false)[0];if(hit)otvoriFioku(hit.object.userData.fioka)});
