@@ -43,16 +43,37 @@ nav.sobe button[aria-pressed="true"] small{color:var(--on);opacity:.85}
 .mere dt{color:var(--muted)}
 .mere dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
 .mere p{font-size:.8rem;color:var(--muted);margin:10px 0 0}
-.main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
-@media (max-width:860px){.main{grid-template-columns:1fr}}
-.stagebox{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:8px;overflow:hidden;height:min(70vh,600px);min-height:360px;touch-action:none}
+.stagebox{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:8px;overflow:hidden;min-height:340px;touch-action:none}
+/* ekran = zaglavlje + 3D do dna, bez listanja */
+.wrap#app{height:100svh;grid-template-rows:auto minmax(0,1fr);padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+@media (max-width:640px){.wrap#app{gap:10px}.top .eyebrow,.top .sub{display:none}h1{font-size:1.6rem}
+ nav.sobe{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none}nav.sobe button{min-width:0;flex:none;padding:5px 12px}}
 .stagebox canvas{display:block;width:100%;height:100%}
 .views{position:absolute;left:10px;top:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px}
 button{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 10px;cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dock{position:absolute;left:10px;right:10px;bottom:34px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.dock button{padding:9px 14px;font-size:.9rem;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.dock button[hidden]{display:none}
+.dock .glavno{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.dock small{font-family:var(--mono);font-weight:400;opacity:.85}
 .hint{position:absolute;right:10px;bottom:8px;font-size:.75rem;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:4px;opacity:.9}
-.panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:16px;min-width:0}
+.panel{display:grid;gap:16px;min-width:0}
+/* prozor odozdo: renoviranje i fioke; ekran ostaje 3D */
+.sheet-bg{position:fixed;inset:0;z-index:19;background:rgba(10,16,20,.35)}
+.sheet-bg[hidden],.sheet[hidden]{display:none}
+.sheet{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,620px);max-height:82svh;overflow:auto;overscroll-behavior:contain;
+  background:var(--paper);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.18);
+  padding:0 16px max(16px,env(safe-area-inset-bottom,0px));animation:gore .22s ease-out}
+@keyframes gore{from{transform:translate(-50%,40px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet-head{position:sticky;top:0;z-index:1;background:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:18px 0 10px;touch-action:none}
+.sheet-head::before{content:"";position:absolute;left:50%;top:7px;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:var(--line)}
+.sheet-head h2{font-family:var(--display);font-size:1.4rem;margin:0}
+.sheet-head button{font-size:1.1rem;line-height:1;padding:6px 11px}
+.sheet .mere{border:0;padding:0;background:none;margin-top:16px}
+.sheet .ko{margin-top:16px}
 h3{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
 label.tog{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:.9rem}
@@ -85,9 +106,6 @@ body{margin:0}
 .gate p{margin:0;color:var(--muted);font-size:.9rem}
 .gate button{padding:12px;font-size:1rem;font-weight:600;background:var(--accent);border-color:var(--accent);color:var(--on)}
 .gate .greska{color:#c0392b;min-height:1.2em}
-.fioka{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px}
-.fioka[hidden]{display:none}
-.fioka .row h3{margin:0}
 .fioka ul{gap:0}
 .fioka li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--grid)}
 .fioka li small{display:block;color:var(--muted);font-size:.8rem;font-family:var(--mono)}
@@ -117,12 +135,16 @@ body{margin:0}
     <nav class="sobe" id="sobe" aria-label="Sobe"></nav>
   </div>
 
-  <div class="main">
-    <div class="stagebox" id="stage">
-      <div class="views" id="views"></div>
-      <div class="hint">prevuci da okreneš · štipni za zum</div>
-    </div>
+  <div class="stagebox" id="stage">
+    <div class="views" id="views"></div>
+    <div class="dock"><button type="button" id="dugme-fioka" hidden></button><button type="button" class="glavno" id="dugme-reno">Renoviranje</button></div>
+    <div class="hint" id="hint">prevuci da okreneš · štipni za zum</div>
+  </div>
+</div>
 
+<div class="sheet-bg" id="sheet-bg" hidden></div>
+<section class="sheet" id="sheet-reno" role="dialog" aria-labelledby="reno-naslov" hidden>
+  <div class="sheet-head"><h2 id="reno-naslov">Renoviranje</h2><button type="button" data-zatvori aria-label="Zatvori">✕</button></div>
     <div class="panel">
       <div>
         <h3 id="naslov-stavke">Šta ide u sobu</h3>
@@ -135,19 +157,18 @@ body{margin:0}
         <label class="tog"><input type="checkbox" id="furn"> Nameštaj</label>
       </div>
     </div>
-  </div>
-  <section class="fioka" id="fioka" hidden>
-    <div class="row"><h3 id="fioka-naslov">Fioka</h3><button type="button" id="fioka-dugme" aria-expanded="false">Otvori fioku</button></div>
-    <div class="state" id="fioka-stanje"></div>
-    <ul id="fioka-spisak"></ul>
-  </section>
   <section class="mere">
     <h3>Mere sobe</h3>
     <dl id="mere"></dl>
     <p id="mere-napomena"></p>
   </section>
   <div class="ko"><span id="ko"></span><button type="button" id="odjava">Odjavi se</button></div>
-</div>
+</section>
+<section class="sheet fioka" id="sheet-fioka" role="dialog" aria-labelledby="fioka-naslov" hidden>
+  <div class="sheet-head"><h2 id="fioka-naslov">Fioka</h2><button type="button" data-zatvori aria-label="Zatvori">✕</button></div>
+  <div class="state" id="fioka-stanje"></div>
+  <ul id="fioka-spisak"></ul>
+</section>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
@@ -234,7 +255,8 @@ function roomOf(r){return Object.assign({},r,{pod:POD[r.pod]||texLaminat,zidIme:
   pogledi:(r.pogledi||[]).map(v=>[v.ime,v.kamera,v.cilj]),mere:(r.mere||[]).map(v=>[v.sta,v.koliko]),
   zidovi:()=>(r.zidovi||[]).map(z=>Object.assign({},z,{holes:(z.holes||[]).map(([x0,x1,y0,y1])=>({x0,x1,y0,y1}))})),
   gradi(){(r.naZidu||[]).forEach(k=>{const w=wall(k.zid);if(!w)return;const m=meshOf(k);m.material.transparent=true;w.g.add(m);w.extras.push({m,base:k.base==null?1:k.base})});
-   (r.komadi||[]).forEach(k=>{const m=meshOf(k);m.receiveShadow=true;furn.add(m)})}})}
+   (r.komadi||[]).forEach(k=>{const m=meshOf(k);m.receiveShadow=true;if(k.fioka){m.userData.fioka=k.fioka;fiokaMesh.push(m)}furn.add(m)})}})}
+let fiokaMesh=[];
 let ROOMS={},ORDER=[];
 function setRooms(data){ROOMS={};Object.keys(data||{}).sort((a,b)=>(data[a].red||0)-(data[b].red||0)).forEach(id=>ROOMS[id]=roomOf(data[id]));ORDER=Object.keys(ROOMS)}
 
@@ -321,6 +343,7 @@ function renderList(){renderNav();if(!loaded)return;
   const o=otvoreno(S);
   stEl.textContent=`${S.length-o.open.length} od ${S.length} urađeno · bledo = još nije`;
   sumEl.innerHTML=`<span>Treba još${o.oko?" (otprilike)":""}</span><strong>${din(o.zbir)}</strong>${bezCene(o.bez)}`}
+ $("dugme-reno").innerHTML=S.length?`Renoviranje <small>· ${S.length-otvoreno(S).open.length}/${S.length}</small>`:"Renoviranje";
  const k=otvoreno(all);
  kucaEl.innerHTML=`<div class="sum"><span>Cela kuća, treba još${k.oko?" (otprilike)":""}</span><strong>${din(k.zbir)}</strong>${bezCene(k.bez)}</div>`;
  listEl.querySelectorAll("[data-show]").forEach(el=>el.onchange=()=>{shown[el.dataset.show]=el.checked?1:0;try{localStorage.setItem("kuca3d-prikaz",JSON.stringify(shown))}catch(e){}items.forEach(itemOp);renderList()});
@@ -329,7 +352,7 @@ function renderList(){renderNav();if(!loaded)return;
   catch(e){el.disabled=false;stEl.textContent="Nije sačuvano, probaj ponovo."}})}
 
 // --- otvaranje sobe: stara se skloni, nova se sagradi
-function clearRoom(){dropItems();if(roomG){scene.remove(roomG);roomG.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose()}})}walls=[];wallIx={}}
+function clearRoom(){fiokaMesh=[];dropItems();if(roomG){scene.remove(roomG);roomG.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose()}})}walls=[];wallIx={}}
 function openRoom(id){if(!ROOMS[id])id=ORDER[0];
  clearRoom();st.soba=id;save();room=ROOMS[id];W=room.W;D=room.D;H=room.visina;
  try{history.replaceState(null,"","#"+id)}catch(e){}
@@ -354,22 +377,44 @@ function openRoom(id){if(!ROOMS[id])id=ORDER[0];
  $("views").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const v=views[+b.dataset.v];go(v[1],v[2])});
  applyFurn();buildItems();renderList();pokaziFioku()}
 
-// --- fioke: stvar živi negde drugde (SVESKA), fioka je samo pokaže. Čita se kroz most kuca-most, ništa se ne upisuje.
-const FIOKE={dnevna:{ime:"obaveze",naslov:"Fioka · obaveze"}};
-const fEl=$("fioka"),fDug=$("fioka-dugme"),fSt=$("fioka-stanje"),fLi=$("fioka-spisak");
-function zatvoriFioku(){fLi.innerHTML="";fSt.textContent="";fDug.textContent="Otvori fioku";fDug.setAttribute("aria-expanded","false")}
-function pokaziFioku(){const f=FIOKE[st.soba];zatvoriFioku();fEl.hidden=!f||!api.fioka;if(f)$("fioka-naslov").textContent=f.naslov}
-async function otvoriFioku(){const f=FIOKE[st.soba];if(!f)return;
- if(fDug.getAttribute("aria-expanded")==="true"){zatvoriFioku();return}
- fDug.setAttribute("aria-expanded","true");fDug.textContent="Zatvori fioku";fSt.textContent="Otvaram…";fLi.innerHTML="";
- try{const red=await api.fioka(f.ime);if(fDug.getAttribute("aria-expanded")!=="true")return;
-  const [zag,...R]=red.length?red:[[]],k=ime=>zag.indexOf(ime),c=(r,ime)=>k(ime)<0?"":(r[k(ime)]||"");
+// --- prozori odozdo (renoviranje, fioke): ekran ostaje 3D, spisak se otvara tek na dodir
+const bgEl=$("sheet-bg");let otvoren=null;
+function otvoriProzor(id){if(otvoren)zatvoriProzor();otvoren=$(id);otvoren.hidden=false;bgEl.hidden=false;otvoren.scrollTop=0;const x=otvoren.querySelector("[data-zatvori]");x&&x.focus({preventScroll:true})}
+function zatvoriProzor(){if(!otvoren)return;otvoren.hidden=true;bgEl.hidden=true;otvoren=null}
+bgEl.onclick=zatvoriProzor;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")zatvoriProzor()});
+document.querySelectorAll(".sheet").forEach(sh=>{sh.querySelector("[data-zatvori]").onclick=zatvoriProzor;
+ // povuci na dole za zatvaranje
+ const h=sh.querySelector(".sheet-head");let y0=null;
+ h.addEventListener("pointerdown",e=>{y0=e.clientY});
+ h.addEventListener("pointerup",e=>{if(y0!=null&&e.clientY-y0>60)zatvoriProzor();y0=null});
+ h.addEventListener("pointercancel",()=>{y0=null})});
+$("dugme-reno").onclick=()=>otvoriProzor("sheet-reno");
+
+// --- fioke: stvar živi negde drugde (SVESKA), fioka je samo pokaže. Fioka je komad nameštaja (polje fioka u kuca/sobe);
+// dodir na njega u 3D otvara prozor. Čita se kroz most kuca-most, ništa se ne upisuje.
+const FIOKA_IME={obaveze:"Obaveze"};
+const fSt=$("fioka-stanje"),fLi=$("fioka-spisak"),fDug=$("dugme-fioka");
+let fiokaZahtev=0;
+function pokaziFioku(){const f=fiokaMesh[0]&&api.fioka?fiokaMesh[0].userData.fioka:null;fDug.hidden=!f;
+ if(f){fDug.textContent=FIOKA_IME[f]||f;fDug.onclick=()=>otvoriFioku(f)}
+ $("hint").textContent=f?"dodirni TV komodu = obaveze · prevuci da okreneš":"prevuci da okreneš · štipni za zum"}
+async function otvoriFioku(ime){const z=++fiokaZahtev;
+ $("fioka-naslov").textContent=FIOKA_IME[ime]||ime;fSt.textContent="Otvaram fioku…";fLi.innerHTML="";otvoriProzor("sheet-fioka");
+ try{const red=await api.fioka(ime);if(z!==fiokaZahtev)return;
+  const [zag,...R]=red.length?red:[[]],k=n=>zag.indexOf(n),c=(r,n)=>k(n)<0?"":(r[k(n)]||"");
   const S=R.filter(r=>c(r,"STA"));
   fSt.textContent=S.length?`${S.length} u fioci · iz SVESKE, samo za gledanje`:"Fioka je prazna.";
   fLi.innerHTML=S.map(r=>{const stat=c(r,"STATUS"),kl=/^URADJENO/i.test(stat)?" uradjeno":/^PROBIJENO/i.test(stat)?" probijeno":"";
    return `<li><span>${esc(c(r,"STA"))}<small>rok ${esc(c(r,"ROK")||"—")} · podsetnik od ${esc(c(r,"PODSETNIK OD")||"—")}</small></span><span class="st${kl}">${esc(stat||"—")}</span></li>`}).join("")}
- catch(e){if(fDug.getAttribute("aria-expanded")==="true")fSt.textContent="Fioka trenutno ne može da se otvori ("+(e.message||"greška")+"). Probaj ponovo."}}
-fDug.onclick=otvoriFioku;
+ catch(e){if(z===fiokaZahtev)fSt.textContent="Fioka trenutno ne može da se otvori ("+(e.message||"greška")+"). Probaj ponovo."}}
+// dodir (ne prevlačenje) na komad sa fiokom
+const ray=new THREE.Raycaster(),tacka=new THREE.Vector2();let dole=null;
+ren.domElement.addEventListener("pointerdown",e=>{dole={x:e.clientX,y:e.clientY,t:Date.now()}});
+ren.domElement.addEventListener("pointerup",e=>{if(!dole)return;const d=dole;dole=null;
+ if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>8||Date.now()-d.t>600||!fiokaMesh.length||!furn.visible)return;
+ const r=ren.domElement.getBoundingClientRect();tacka.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+ ray.setFromCamera(tacka,cam);const hit=ray.intersectObjects(fiokaMesh,false)[0];if(hit)otvoriFioku(hit.object.userData.fioka)});
 
 function applyFurn(){if(furn)furn.visible=!!st.namestaj;$("furn").checked=!!st.namestaj}
 $("furn").onchange=e=>{st.namestaj=e.target.checked?1:0;save();applyFurn()};
@@ -392,6 +437,8 @@ function loop(){
     w.mat.opacity=w.op;w.mat.depthWrite=w.op>0.9;
     w.extras.forEach(x=>{x.m.material.opacity=x.base*w.op;x.m.material.depthWrite=w.op>0.9&&x.base>=1;x.m.castShadow=w.op>0.5})});
   items.forEach(it=>{if(it.wall)itemOp(it)});
+  // fioka lagano svetli da se zna da se dodiruje
+  if(fiokaMesh.length){const k=reduce?0.35:0.3+0.2*Math.sin(Date.now()/450);fiokaMesh.forEach(m=>{m.material.emissive.set(0x2f5d78);m.material.emissiveIntensity=k})}
   ren.render(scene,cam);
 }
 window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(ROOMS[h]&&h!==st.soba)openRoom(h)});
