@@ -85,6 +85,15 @@ body{margin:0}
 .gate p{margin:0;color:var(--muted);font-size:.9rem}
 .gate button{padding:12px;font-size:1rem;font-weight:600;background:var(--accent);border-color:var(--accent);color:var(--on)}
 .gate .greska{color:#c0392b;min-height:1.2em}
+.fioka{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px}
+.fioka[hidden]{display:none}
+.fioka .row h3{margin:0}
+.fioka ul{gap:0}
+.fioka li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--grid)}
+.fioka li small{display:block;color:var(--muted);font-size:.8rem;font-family:var(--mono)}
+.fioka .st{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;padding:2px 8px;border:1px solid var(--line);border-radius:6px;white-space:nowrap;color:var(--accent);border-color:var(--accent)}
+.fioka .st.uradjeno{color:var(--done);border-color:var(--done)}
+.fioka .st.probijeno{color:#c0392b;border-color:#c0392b}
 .ko{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:.8rem;color:var(--muted)}
 </style>
 </head>
@@ -127,6 +136,11 @@ body{margin:0}
       </div>
     </div>
   </div>
+  <section class="fioka" id="fioka" hidden>
+    <div class="row"><h3 id="fioka-naslov">Fioka</h3><button type="button" id="fioka-dugme" aria-expanded="false">Otvori fioku</button></div>
+    <div class="state" id="fioka-stanje"></div>
+    <ul id="fioka-spisak"></ul>
+  </section>
   <section class="mere">
     <h3>Mere sobe</h3>
     <dl id="mere"></dl>
@@ -338,7 +352,24 @@ function openRoom(id){if(!ROOMS[id])id=ORDER[0];
  const views=[["Iskosa",room.iso,[0,0.9,0]],["Odozgo",[0,room.top,0.01],[0,0,0]],...room.pogledi];
  $("views").innerHTML=views.map(([n],i)=>`<button type="button" data-v="${i}">${esc(n)}</button>`).join("");
  $("views").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const v=views[+b.dataset.v];go(v[1],v[2])});
- applyFurn();buildItems();renderList()}
+ applyFurn();buildItems();renderList();pokaziFioku()}
+
+// --- fioke: stvar živi negde drugde (SVESKA), fioka je samo pokaže. Čita se kroz most kuca-most, ništa se ne upisuje.
+const FIOKE={dnevna:{ime:"obaveze",naslov:"Fioka · obaveze"}};
+const fEl=$("fioka"),fDug=$("fioka-dugme"),fSt=$("fioka-stanje"),fLi=$("fioka-spisak");
+function zatvoriFioku(){fLi.innerHTML="";fSt.textContent="";fDug.textContent="Otvori fioku";fDug.setAttribute("aria-expanded","false")}
+function pokaziFioku(){const f=FIOKE[st.soba];zatvoriFioku();fEl.hidden=!f||!api.fioka;if(f)$("fioka-naslov").textContent=f.naslov}
+async function otvoriFioku(){const f=FIOKE[st.soba];if(!f)return;
+ if(fDug.getAttribute("aria-expanded")==="true"){zatvoriFioku();return}
+ fDug.setAttribute("aria-expanded","true");fDug.textContent="Zatvori fioku";fSt.textContent="Otvaram…";fLi.innerHTML="";
+ try{const red=await api.fioka(f.ime);if(fDug.getAttribute("aria-expanded")!=="true")return;
+  const [zag,...R]=red.length?red:[[]],k=ime=>zag.indexOf(ime),c=(r,ime)=>k(ime)<0?"":(r[k(ime)]||"");
+  const S=R.filter(r=>c(r,"STA"));
+  fSt.textContent=S.length?`${S.length} u fioci · iz SVESKE, samo za gledanje`:"Fioka je prazna.";
+  fLi.innerHTML=S.map(r=>{const stat=c(r,"STATUS"),kl=/^URADJENO/i.test(stat)?" uradjeno":/^PROBIJENO/i.test(stat)?" probijeno":"";
+   return `<li><span>${esc(c(r,"STA"))}<small>rok ${esc(c(r,"ROK")||"—")} · podsetnik od ${esc(c(r,"PODSETNIK OD")||"—")}</small></span><span class="st${kl}">${esc(stat||"—")}</span></li>`}).join("")}
+ catch(e){if(fDug.getAttribute("aria-expanded")==="true")fSt.textContent="Fioka trenutno ne može da se otvori ("+(e.message||"greška")+"). Probaj ponovo."}}
+fDug.onclick=otvoriFioku;
 
 function applyFurn(){if(furn)furn.visible=!!st.namestaj;$("furn").checked=!!st.namestaj}
 $("furn").onchange=e=>{st.namestaj=e.target.checked?1:0;save();applyFurn()};
@@ -390,12 +421,17 @@ storageBucket:"budzet-f3992.firebasestorage.app",
 messagingSenderId:"633902520397",
 appId:"1:633902520397:web:1488ffe3d9626a8c586404"
 });
+const MOST='https://kuca-most.andrija-radmilovic1990.workers.dev';
 const db=getDatabase(app),auth=getAuth(app),google=new GoogleAuthProvider();
 const $=id=>document.getElementById(id);
 const api={
  sobe:()=>get(ref(db,'kuca/sobe')).then(s=>s.val()),
  stavke:(cb,err)=>onValue(ref(db,'kuca/stavke'),s=>cb(s.val()),err),
- setStanje:(id,v)=>set(ref(db,`kuca/stavke/${id}/stanje`),v)
+ setStanje:(id,v)=>set(ref(db,`kuca/stavke/${id}/stanje`),v),
+ // fioka: most kuca-most čita SVESKU (samo čita); pušta isti nalog koji pušta baza
+ fioka:async ime=>{const t=await auth.currentUser.getIdToken();
+  const r=await fetch(`${MOST}/${ime}`,{headers:{authorization:'Bearer '+t}});const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.greska||('greška '+r.status));return j.redovi||[]}
 };
 function greska(e){const c=(e&&e.code)||'';
  $('greska').textContent=c==='auth/unauthorized-domain'?'Ova adresa još nije dozvoljena u Firebase-u.':c==='auth/popup-blocked'?'Pregledač je blokirao prozor za prijavu.':c==='auth/network-request-failed'?'Nema internet konekcije.':c==='PERMISSION_DENIED'||/permission/i.test(e&&e.message||'')?'Ovaj nalog nema pristup kući.':((e&&e.message)||'Greška pri prijavi.')}
