@@ -210,6 +210,45 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 .konacno b{font-family:var(--naslov)}
 .konacno .prvi b{color:var(--zlato)}
 #konfete{position:fixed;inset:0;pointer-events:none;z-index:60}
+/* ruka */
+.ruka-scena{position:absolute;left:50%;bottom:0;width:min(56%,230px);transform:translate(-50%,105%);z-index:4;pointer-events:none;transition:transform .32s cubic-bezier(.3,.7,.3,1)}
+.ruka-scena.gore{transform:translate(-50%,20%)}
+.ruka-scena.trese .ruka-svg{animation:tresiRuku .12s ease-in-out infinite alternate}
+@keyframes tresiRuku{from{transform:translate(-7px,4px) rotate(-5deg)}to{transform:translate(7px,-4px) rotate(5deg)}}
+.ruka-svg{width:100%;display:block;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
+.ruka-svg .prst,.ruka-svg .palac{transition:transform .17s ease-out}
+.ruka-svg .nokat{transition:opacity .15s}
+.ruka-svg.zatvorena .prst{transform:scaleY(.34)}
+.ruka-svg.zatvorena .nokat{opacity:0}
+.ruka-svg.zatvorena .palac{transform:rotate(32deg) scaleY(.75)}
+.kocka.skace-ruka .omotac{animation:izRuke 1s cubic-bezier(.3,.6,.4,1)}
+@keyframes izRuke{0%{transform:translateY(170px) scale(.45);opacity:0}12%{opacity:1}40%{transform:translateY(-28px) scale(1.08)}60%{transform:translateY(4px)}80%{transform:translateY(-6px)}100%{transform:none}}
+/* žetoni i prodavnica */
+.zetoni{font-weight:700;font-size:15px;color:var(--zlato);white-space:nowrap;background:rgba(220,187,110,.12);border:1px solid rgba(220,187,110,.3);padding:.3rem .7rem;border-radius:20px}
+.izlog{margin:0 1rem .8rem;height:230px;border-radius:22px;overflow:hidden;position:relative;
+  background:radial-gradient(ellipse 90% 80% at 50% 30%,var(--filc1),var(--filc2));box-shadow:inset 0 0 0 5px var(--filc-ivica),inset 0 0 40px rgba(0,0,0,.4)}
+.izlog .ruka-svg{position:absolute;left:50%;top:6px;width:170px;transform:translateX(-50%)}
+.tabovi-mali{display:flex;gap:.4rem;padding:0 1rem .7rem;overflow-x:auto}
+.tabovi-mali button{flex:1 0 auto;padding:.55rem .8rem;border-radius:20px;background:var(--povrs);border:1px solid var(--ivica);font-size:14px;font-weight:600;color:var(--tekst2)}
+.tabovi-mali button.izabran{background:var(--zlato);color:#1d1608;border-color:var(--zlato)}
+.mreza{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+.predmet{background:var(--povrs);border:1px solid var(--ivica);border-radius:14px;padding:.7rem .4rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;text-align:center;transition:border-color .2s,transform .12s}
+.predmet:active{transform:scale(.96)}
+.predmet.gleda{border-color:var(--zlato);box-shadow:0 0 0 1px var(--zlato)}
+.predmet .uzorak{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.predmet .ime{font-size:12.5px;line-height:1.25;min-height:2.5em;display:flex;align-items:center}
+.predmet .cena{font-size:12px;font-weight:700;color:var(--zlato)}
+.predmet .cena.ima{color:var(--tekst3);font-weight:600}
+.predmet .cena.nosi{color:var(--zelena)}
+.predmet.poklon{border-color:rgba(214,31,60,.5);background:linear-gradient(180deg,rgba(214,31,60,.1),var(--povrs))}
+.izbor-ruke{display:flex;gap:.7rem;margin:.4rem 0 1rem}
+.izbor-ruke button{flex:1;border-radius:18px;border:1px solid var(--ivica);background:radial-gradient(ellipse at 50% 30%,var(--filc1),var(--filc2));padding:.5rem .5rem .7rem;color:#fff;font-weight:600;overflow:hidden}
+.izbor-ruke button .ruka-svg{width:100%;height:170px;object-fit:cover;margin-bottom:.3rem}
+.izbor-ruke button.izabran{box-shadow:0 0 0 3px var(--zlato)}
+.koze{display:flex;gap:.7rem;justify-content:center}
+.koze button{width:44px;height:44px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.koze button.izabran{border-color:var(--zlato);box-shadow:0 0 0 2px var(--pozadina) inset}
+.nagrada{font-family:var(--naslov);font-weight:700;color:var(--zlato);font-size:20px;margin-top:.4rem}
 .instaliraj{display:none}
 .instaliraj.moze{display:flex}
 @media (max-height:640px){:root{--d:min(14vw,58px)}.logo{font-size:46px}.pocetna-vrh{padding-top:.5rem}.logo-kocke{margin-bottom:.8rem}}
@@ -231,6 +270,7 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
       <button class="dugme glavno" id="dugmeNastavi" style="display:none">Nastavi partiju</button>
       <button class="dugme" id="dugmeKompjuter">🎲 Protiv kompjutera</button>
       <button class="dugme" id="dugmeLokalno">👥 Na istom telefonu</button>
+      <button class="dugme" id="dugmeProdavnica"><span id="prodIkona">💅</span> Prodavnica <span class="zetoni" id="pocZetoni"></span></button>
       <button class="dugme instaliraj" id="dugmeInstaliraj">📲 Instaliraj na telefon</button>
       <div class="mala-dugmad">
         <button data-ide="pravila">Pravila i bodovi</button>
@@ -287,6 +327,7 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
     <div class="sacuvano" id="sacuvano"></div>
     <div class="polje" id="polje"></div>
     <div class="pecat" id="pecat"><b>FARKLE!</b><span id="pecatTekst"></span></div>
+    <div class="ruka-scena" id="rukaScena"></div>
   </div>
   <div class="potez-info">
     <div><div class="oznaka">U potezu</div><div class="vrednost" id="poeniPoteza">0</div></div>
@@ -338,6 +379,7 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
       <div class="polje-forme"><label>Brzina kompjutera</label><div class="segment" id="segBrzina"><button data-v="spora">opušteno</button><button data-v="normalna">normalno</button><button data-v="brza">brzo</button></div></div>
       <div class="prekidac" data-pod="zvuk"><div class="opis">Zvuk</div><div class="sviter"></div></div>
       <div class="prekidac" data-pod="vibracija"><div class="opis">Vibracija</div><div class="sviter"></div></div>
+      <div class="prekidac" data-pod="ruka"><div class="opis">Ruka baca kockice<small>Izgled ruke i ukrasi su u Prodavnici</small></div><div class="sviter"></div></div>
       <div class="prekidac" data-pod="pomoc"><div class="opis">Pokaži koje kockice boduju<small>Zlatna tačkica ispod kockice</small></div><div class="sviter"></div></div>
     </div>
     <div class="kartica">
@@ -355,13 +397,24 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 <!-- prozori -->
 <div class="preklop" id="prozorPotvrda"><div class="prozor"><h3 id="potvrdaNaslov"></h3><p id="potvrdaTekst"></p>
   <div class="red-dugmadi"><button class="dugme" id="potvrdaNe">Ne</button><button class="dugme glavno" id="potvrdaDa">Da</button></div></div></div>
-<div class="preklop" id="prozorKraj"><div class="prozor"><div style="font-size:42px">🏆</div><div class="pobednik" id="krajPobednik"></div><p id="krajTekst" style="margin-bottom:0"></p>
+<!-- PRODAVNICA -->
+<section class="ekran" id="prodavnica">
+  <div class="zaglavlje"><button class="nazad" id="prodNazad">‹</button><h2>Prodavnica</h2><span class="zetoni" id="prodZetoni"></span></div>
+  <div class="izlog" id="izlog"></div>
+  <div class="tabovi-mali" id="prodTabovi"></div>
+  <div class="skrol"><div id="prodSadrzaj"></div></div>
+  <div class="podnozje"><button class="dugme glavno" id="prodAkcija" style="width:100%"></button></div>
+</section>
+<div class="preklop" id="prozorRuka"><div class="prozor"><h3>Koja ruka baca kockice?</h3><p>Može da se promeni u Prodavnici, pod „Ruka“.</p>
+  <div class="izbor-ruke" id="izborRukePrvi"></div></div></div>
+<div class="preklop" id="prozorKraj"><div class="prozor"><div style="font-size:42px">🏆</div><div class="pobednik" id="krajPobednik"></div><p id="krajTekst" style="margin-bottom:0"></p><div class="nagrada" id="krajNagrada"></div>
   <div class="konacno" id="krajTabela"></div>
   <div class="red-dugmadi"><button class="dugme" id="krajPocetna">Početna</button><button class="dugme glavno" id="krajRevans">Revanš</button></div></div></div>
 <div class="tost" id="tost"></div>
 <canvas id="konfete"></canvas>
 
 <script src="/Aplikacije/farkle/engine.js"></script>
+<script src="/Aplikacije/farkle/ruka.js"></script>
 <script>
 (function(){
 'use strict';
@@ -377,7 +430,8 @@ const broj = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- podešavanja ---------- */
-const POD0 = { ime:'', tema:'auto', brzina:'normalna', zvuk:true, vibracija:true, pomoc:true, posveta:'', nivo:'srednji', prvi:'slucajno',
+const R = window.Ruka;
+const POD0 = { ruka:true, ime:'', tema:'auto', brzina:'normalna', zvuk:true, vibracija:true, pomoc:true, posveta:'', nivo:'srednji', prvi:'slucajno',
   mod:'bot', imena:['Igrač 1','Igrač 2'], pravila:{} };
 let pod = Object.assign({}, POD0, ucitaj(KLJ.pod, {}));
 // pravila v2 (22.11.2026): upis od 300 u svakom potezu umesto ulaza od 500
@@ -390,14 +444,31 @@ if(staraPravila){ try{ localStorage.setItem(KLJ.pod, JSON.stringify(pod)); }catc
 let stat = Object.assign({ lak:{p:0,i:0}, srednji:{p:0,i:0}, tezak:{p:0,i:0}, najPotez:0, partija:0 }, ucitaj(KLJ.stat, {}));
 function sacuvajPod(){ sacuvaj(KLJ.pod, pod); }
 
+/* ---------- kasa: žetoni, ukrasi, ruka ---------- */
+const KASA_KLJ = 'farkle_kasa_v1';
+let kasa = Object.assign({ zetoni:100, imam:[], nosi:{}, pol:null, koza:'svetla', poklon:false, dan:'' }, ucitaj(KASA_KLJ, {}));
+function sacuvajKasu(){ sacuvaj(KASA_KLJ, kasa); }
+function imam(p){ return p.cena === 0 && !p.poklon ? true : p.poklon ? !!kasa.poklon : kasa.imam.includes(p.id); }
+function nosim(tip){
+  const p = R.PO_ID[kasa.nosi[tip]];
+  return p && R.zaPol(p, kasa.pol || 'z') && imam(p) ? p.id : R.PODRAZUMEVANO[tip];
+}
+function rukaOpcije(probaj){
+  const nosi = { nokti:nosim('nokti'), prsten:nosim('prsten'), zglob:nosim('zglob'), tetovaza:nosim('tetovaza') };
+  if(probaj) nosi[probaj.tip] = probaj.id;
+  return { pol:kasa.pol || 'z', koza:kasa.koza, nosi };
+}
+function otkljucajPoklon(){ if(!kasa.poklon){ kasa.poklon = true; sacuvajKasu(); setTimeout(() => tost('🎁 U Prodavnici te čeka poklon', 2600), 900); } }
+
 // posveta iz linka: #posveta=<base64url> (ostaje samo u ovom telefonu)
 (function(){
+  if(/(^#|&)poklon\b/.test(location.hash)) otkljucajPoklon();
   const m = location.hash.match(/posveta=([^&]+)/);
-  if(!m) return;
+  if(!m){ if(/poklon/.test(location.hash)) try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} return; }
   try{
     let b = m[1].replace(/-/g,'+').replace(/_/g,'/'); while(b.length % 4) b += '=';
     const t = decodeURIComponent(escape(atob(b))).slice(0, 300);
-    pod.posveta = t; sacuvajPod();
+    pod.posveta = t; sacuvajPod(); otkljucajPoklon();
   }catch(e){}
   try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
 })();
@@ -418,18 +489,49 @@ function zvuk(vrsta){
     if(!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
     if(ac.state === 'suspended') ac.resume();
     const t = ac.currentTime;
-    if(vrsta === 'bacanje'){
-      for(let i = 0; i < 9; i++){
-        const kad = t + i * 0.055 + Math.random() * 0.04;
-        const dug = 0.03 + Math.random() * 0.03;
-        const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * dug), ac.sampleRate);
-        const d = buf.getChannelData(0);
-        for(let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / d.length, 3);
-        const s = ac.createBufferSource(); s.buffer = buf;
-        const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800 + Math.random() * 2200; f.Q.value = 2.5;
-        const g = ac.createGain(); g.gain.value = 0.55 * (1 - i / 11);
-        s.connect(f); f.connect(g); g.connect(ac.destination); s.start(kad);
+    // kratak šum kroz filter: klik kockice o kockicu ili o sto
+    const sum = (kad, dug, tip, fr, q, jac) => {
+      const buf = ac.createBuffer(1, Math.max(1, Math.floor(ac.sampleRate * dug)), ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for(let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / d.length, 4);
+      const s = ac.createBufferSource(); s.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = tip; f.frequency.value = fr; f.Q.value = q;
+      const g = ac.createGain(); g.gain.value = jac;
+      s.connect(f); f.connect(g); g.connect(ac.destination); s.start(kad);
+    };
+    const tup = (kad, jac) => { // tupi udarac o filc
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(170 + Math.random() * 40, kad); o.frequency.exponentialRampToValueAtTime(55, kad + 0.09);
+      g.gain.setValueAtTime(jac, kad); g.gain.exponentialRampToValueAtTime(0.0001, kad + 0.13);
+      o.connect(g); g.connect(ac.destination); o.start(kad); o.stop(kad + 0.15);
+      sum(kad, 0.045, 'lowpass', 1100, 0.7, jac * 0.9);
+    };
+    if(vrsta === 'tresenje'){ // kockice zveckaju u šaci
+      let kad = t;
+      while(kad < t + 0.62){
+        sum(kad, 0.012 + Math.random() * 0.014, 'bandpass', 2600 + Math.random() * 2600, 4, 0.22 + Math.random() * 0.25);
+        if(Math.random() < 0.35) sum(kad + 0.006, 0.02, 'lowpass', 700, 0.8, 0.18);
+        kad += 0.028 + Math.random() * 0.045;
       }
+      return;
+    }
+    if(vrsta === 'bacanje'){ // padaju na sto: udarci, odskoci i sudari
+      const n = 6;
+      for(let i = 0; i < n; i++){
+        const kad = t + 0.08 + i * 0.045 + Math.random() * 0.05;
+        tup(kad, 0.42 - i * 0.03);
+        sum(kad + 0.004, 0.014, 'bandpass', 3200 + Math.random() * 1800, 3, 0.3);
+        const k2 = kad + 0.16 + Math.random() * 0.08; tup(k2, 0.16); sum(k2, 0.01, 'bandpass', 3800, 3, 0.15);
+        if(Math.random() < 0.6) sum(kad + 0.3 + Math.random() * 0.25, 0.012, 'bandpass', 4200 + Math.random() * 1500, 4, 0.18);
+      }
+      return;
+    }
+    if(vrsta === 'novcic'){
+      [[1568, 0], [2093, 0.07], [2637, 0.14]].forEach(([fr, od]) => {
+        const o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle'; o.frequency.value = fr;
+        g.gain.setValueAtTime(0.0001, t + od); g.gain.linearRampToValueAtTime(0.13, t + od + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + od + 0.4);
+        o.connect(g); g.connect(ac.destination); o.start(t + od); o.stop(t + od + 0.45);
+      });
       return;
     }
     const ton = (fr, od, traj, jac, tip) => {
@@ -498,13 +600,14 @@ function prikazi(id, bezIstorije){
   if(id === 'nova') osveziNovu();
   if(id === 'pravila') osveziPravila();
   if(id === 'podesavanja') osveziPodesavanja();
+  if(id === 'prodavnica') osveziProdavnicu();
   if(bio === 'igra' && id !== 'igra') zaustaviBota();
   if(!bezIstorije){ try{ history.pushState({ e:id }, ''); }catch(e){} }
 }
 let povratak = 'pocetna'; // odakle se ušlo u pravila / podešavanja
 window.addEventListener('popstate', ev => {
   const st = ev.state && ev.state.e;
-  if(trenutniEkran === 'pravila' || trenutniEkran === 'podesavanja'){ prikazi(povratak, true); return; }
+  if(trenutniEkran === 'pravila' || trenutniEkran === 'podesavanja' || trenutniEkran === 'prodavnica'){ prikazi(povratak, true); return; }
   if(trenutniEkran === 'pocetna') return;
   prikazi(st && st !== trenutniEkran && st !== 'igra' ? st : 'pocetna', true);
 });
@@ -517,6 +620,7 @@ document.querySelectorAll('[data-ide]').forEach(b => b.addEventListener('click',
 }));
 $('pravilaNazad').onclick = () => history.back();
 $('podesNazad').onclick = () => history.back();
+$('prodNazad').onclick = () => history.back();
 $('igraNazad').onclick = () => history.back();
 $('dugmeBodovi').onclick = () => { povratak = 'igra'; prikazi('pravila'); };
 
@@ -539,7 +643,23 @@ function osveziPocetnu(){
   $('posvetaTekst').textContent = pod.posveta || '';
   const s = ['lak','srednji','tezak'].map(n => stat[n]).reduce((a, b) => ({ p:a.p + b.p, i:a.i + b.i }), { p:0, i:0 });
   $('statistika').textContent = (s.p + s.i) ? ('Protiv kompjutera: ' + s.p + ' pobeda · ' + s.i + ' poraza') : '';
+  $('pocZetoni').textContent = '🪙 ' + broj(kasa.zetoni);
+  $('prodIkona').textContent = kasa.pol === 'm' ? '⌚' : '💅';
+  if(!kasa.pol) setTimeout(pitajRuku, 400);
 }
+function pitajRuku(){
+  if(kasa.pol || trenutniEkran !== 'pocetna') return;
+  const el = $('izborRukePrvi');
+  el.innerHTML = '';
+  [['z', 'Ženska'], ['m', 'Muška']].forEach(([pol, ime]) => {
+    const b = document.createElement('button');
+    b.innerHTML = R.nacrtaj({ pol, koza:kasa.koza, nosi:{} }) + ime;
+    b.onclick = () => { kasa.pol = pol; sacuvajKasu(); $('prozorRuka').classList.remove('vidljiv'); osveziPocetnu(); };
+    el.appendChild(b);
+  });
+  $('prozorRuka').classList.add('vidljiv');
+}
+$('dugmeProdavnica').onclick = () => { povratak = 'pocetna'; prikazi('prodavnica'); };
 $('dugmeNastavi').onclick = () => { const g = sacuvanaPartija(); if(g) udjiUIgru(g); };
 $('dugmeKompjuter').onclick = () => { pod.mod = 'bot'; prikazi('nova'); };
 $('dugmeLokalno').onclick = () => { pod.mod = 'lokalno'; prikazi('nova'); };
@@ -662,7 +782,21 @@ function crtajSacuvano(){
   s.innerHTML = G.potez.sacuvano.map(gr => '<div class="grupa">' + gr.map(malaKocka).join('') + '</div>').join('');
 }
 
-function crtajPolje(animiraj){
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function bacanjeRukom(){
+  const sc = $('rukaScena');
+  sc.innerHTML = R.nacrtaj(rukaOpcije());
+  const svg = sc.querySelector('svg'); svg.classList.add('zatvorena');
+  void sc.offsetWidth;
+  sc.classList.add('gore');
+  await sleep(300);
+  sc.classList.add('trese'); zvuk('tresenje'); vibriraj([12, 50, 12, 50, 12]);
+  await sleep(620);
+  sc.classList.remove('trese');
+  svg.classList.remove('zatvorena');
+  setTimeout(() => sc.classList.remove('gore'), 420);
+}
+function crtajPolje(animiraj, izRuke){
   const p = $('polje'), t = G.potez;
   p.innerHTML = ''; kockeEl = [];
   if(t.faza === 'baci' || !t.bacanje.length){
@@ -684,7 +818,7 @@ function crtajPolje(animiraj){
       telo.style.transition = 'none';
       k._x = Math.floor(Math.random() * 4) * 90; k._y = Math.floor(Math.random() * 4) * 90;
       telo.style.transform = 'rotateX(' + k._x + 'deg) rotateY(' + k._y + 'deg)';
-      k.classList.add('skace');
+      k.classList.add(izRuke ? 'skace-ruka' : 'skace');
       k.style.animationDelay = (i * 40) + 'ms';
       k.querySelector('.omotac').style.animationDelay = (i * 45) + 'ms';
       void telo.offsetWidth;
@@ -699,7 +833,7 @@ function oznaci(){
   const t = G.potez, mogu = new Set();
   if(pod.pomoc && t.faza === 'bira') F.izboriKojiBoduju(t.bacanje, G.pravila).forEach(x => x.indeksi.forEach(i => mogu.add(i)));
   kockeEl.forEach((k, i) => {
-    k.classList.remove('skace');
+    k.classList.remove('skace', 'skace-ruka');
     k.classList.toggle('boduje', mogu.has(i));
     k.classList.toggle('mrtva', t.faza === 'farkle');
     k.classList.toggle('izabrana', izbor.has(i));
@@ -776,7 +910,10 @@ async function izvrsiBacanje(novo){
   $('pecat').classList.remove('vidljiv');
   crtajRezultate(); crtajSacuvano();
   if(G.potez.vruce && bilo === 'bira'){ zvuk('vruce'); vibriraj([20, 40, 20]); tost('🔥 Vruće kockice! Svih šest nazad.', 1800); }
-  crtajPolje(true); crtajInfo();
+  const rukom = pod.ruka !== false && !jeBot();
+  $('dugmeBaci').disabled = true; $('dugmeUpisi').disabled = true;
+  if(rukom){ $('polje').innerHTML = ''; kockeEl = []; await bacanjeRukom(); }
+  crtajPolje(true, rukom); crtajInfo();
   $('dugmeBaci').disabled = true; $('dugmeUpisi').disabled = true;
   zvuk('bacanje'); vibriraj(25);
   await cekaj(1050 + G.potez.bacanje.length * 45);
@@ -885,6 +1022,16 @@ function zavrsenaPartija(){
     G.zabelezeno = true; sacuvaj(KLJ.stat, stat);
   }
   obrisi(KLJ.partija);
+  let zarada = 0;
+  if(!G.isplaceno){
+    if(G.mod === 'bot'){ const bot = G.igraci.find(x => x.tip === 'bot'); zarada = R.nagrada(covekPobedio ? 'pobeda' : 'poraz', bot.nivo); }
+    else zarada = R.nagrada('lokalno');
+    const danas = new Date().toISOString().slice(0, 10);
+    if(kasa.dan !== danas){ zarada += R.NAGRADA.dnevni; kasa.dan = danas; }
+    kasa.zetoni += zarada; G.isplaceno = true; sacuvajKasu();
+  }
+  $('krajNagrada').textContent = zarada ? '+' + zarada + ' 🪙' : '';
+  if(zarada) setTimeout(() => zvuk('novcic'), 1300);
   $('krajPobednik').textContent = G.mod === 'bot' ? (covekPobedio ? 'Pobeda!' : 'Kompjuter je pobedio') : (pob.ime + ' pobeđuje!');
   const najPotez = Math.max.apply(null, G.igraci.map(x => x.najPotez));
   $('krajTekst').textContent = 'Partija je trajala ' + G.krug + ' ' + (G.krug % 10 === 1 && G.krug % 100 !== 11 ? 'krug' : (G.krug % 10 >= 2 && G.krug % 10 <= 4 && (G.krug % 100 < 12 || G.krug % 100 > 14)) ? 'kruga' : 'krugova') + '. Najveći potez: ' + broj(najPotez) + '.';
@@ -927,6 +1074,63 @@ function konfete(){
   })();
 }
 
+
+/* ---------- prodavnica ---------- */
+const TABOVI = [['nokti', 'Nokti'], ['prsten', 'Prstenje'], ['zglob', 'Zglob'], ['tetovaza', 'Tetovaže'], ['ruka', 'Ruka']];
+let prodTab = null, gleda = null;
+const UZORAK = {
+  'n-prirodni':'#f2c4b4', 'n-francuski':'linear-gradient(180deg,#fff 0 32%,#f1cbbf 33%)', 'n-tufne':'radial-gradient(circle at 30% 30%,#fff 0 3px,transparent 3.5px) 0 0/12px 12px,#d7263d',
+  'n-ombre':'linear-gradient(180deg,#d1286e,#fde0ea)', 'n-sljokice':'radial-gradient(circle,#fff 0 1px,transparent 1.5px) 0 0/6px 6px,#9fa4b5', 'n-zlatni':'linear-gradient(135deg,#fff1b8,#e0b443 45%,#fbe7a1 70%,#a9781c)',
+  'n-leopard':'radial-gradient(circle,#3b2414 0 2.4px,transparent 3px) 0 0/11px 11px,#dcae6a', 'n-srce':'linear-gradient(180deg,#e0243f,#9c0b22)'
+};
+const IKONA = { 'p-nema':'∅', 'z-nema':'∅', 't-nema':'∅', 't-kocka':'🎲', 't-srce':'🤍', 't-sidro':'⚓', 't-pik':'♠️', 't-ruza':'🌹', 't-zvezda':'⭐', 'z-perle':'📿', 'z-biseri':'⚪', 'z-privesci':'✨', 'z-koza':'🟫', 'z-poklon':'💝', 'p-rubin':'💍', 'p-dijamant':'💎', 'p-pecatnjak':'🔶', 'p-crni':'⚫' };
+function uzorak(p){
+  if(p.tip === 'nokti') return '<span class="uzorak" style="background:' + (p.boja || UZORAK[p.id] || '#ccc') + '"></span>';
+  let ik = IKONA[p.id] || (p.vrsta === 'sat' ? '⌚' : p.tip === 'prsten' ? '💍' : p.vrsta === 'lanac' ? '⛓️' : '•');
+  return '<span class="uzorak" style="background:var(--povrs2)">' + ik + '</span>';
+}
+function osveziProdavnicu(){
+  const pol = kasa.pol || 'z';
+  const tabovi = TABOVI.filter(([t]) => t !== 'nokti' || pol === 'z');
+  if(!prodTab || !tabovi.some(([t]) => t === prodTab)) prodTab = tabovi[0][0];
+  $('prodTabovi').innerHTML = '';
+  tabovi.forEach(([t, ime]) => {
+    const b = document.createElement('button'); b.textContent = ime; b.classList.toggle('izabran', t === prodTab);
+    b.onclick = () => { prodTab = t; gleda = null; osveziProdavnicu(); };
+    $('prodTabovi').appendChild(b);
+  });
+  $('prodZetoni').textContent = '🪙 ' + broj(kasa.zetoni);
+  const sad = $('prodSadrzaj'), akc = $('prodAkcija');
+  if(prodTab === 'ruka'){
+    $('izlog').innerHTML = R.nacrtaj(rukaOpcije());
+    let h = '<div class="izbor-ruke">';
+    [['z', 'Ženska'], ['m', 'Muška']].forEach(([p, ime]) => { h += '<button data-pol="' + p + '" class="' + (pol === p ? 'izabran' : '') + '">' + R.nacrtaj({ pol:p, koza:kasa.koza, nosi:{} }) + ime + '</button>'; });
+    h += '</div><div class="koze">';
+    Object.keys(R.KOZA).forEach(k => { h += '<button data-koza="' + k + '" title="' + R.KOZA[k].ime + '" class="' + (kasa.koza === k ? 'izabran' : '') + '" style="background:' + R.KOZA[k].a + '"></button>'; });
+    sad.innerHTML = h + '</div>';
+    sad.querySelectorAll('[data-pol]').forEach(b => b.onclick = () => { kasa.pol = b.dataset.pol; sacuvajKasu(); osveziProdavnicu(); });
+    sad.querySelectorAll('[data-koza]').forEach(b => b.onclick = () => { kasa.koza = b.dataset.koza; sacuvajKasu(); osveziProdavnicu(); });
+    akc.style.display = 'none';
+    return;
+  }
+  akc.style.display = '';
+  const lista = R.PREDMETI.filter(p => p.tip === prodTab && R.zaPol(p, pol) && (!p.poklon || kasa.poklon));
+  const pGleda = gleda && R.PO_ID[gleda] && R.PO_ID[gleda].tip === prodTab ? R.PO_ID[gleda] : null;
+  $('izlog').innerHTML = R.nacrtaj(rukaOpcije(pGleda));
+  const nosi = nosim(prodTab);
+  sad.innerHTML = '<div class="mreza">' + lista.map(p => {
+    const st = nosi === p.id ? '<span class="cena nosi">✓ nosiš</span>' : imam(p) ? '<span class="cena ima">imaš</span>' : '<span class="cena">🪙 ' + broj(p.cena) + '</span>';
+    return '<button class="predmet' + (pGleda && pGleda.id === p.id ? ' gleda' : '') + (p.poklon ? ' poklon' : '') + '" data-id="' + p.id + '">' + uzorak(p) + '<span class="ime">' + (p.poklon ? '🎁 ' : '') + esc(p.ime) + '</span>' + st + '</button>';
+  }).join('') + '</div>';
+  sad.querySelectorAll('.predmet').forEach(b => b.onclick = () => { gleda = b.dataset.id; zvuk('klik'); osveziProdavnicu(); });
+  if(!pGleda){ akc.disabled = true; akc.textContent = 'Dodirni ukras da ga probaš'; return; }
+  if(nosi === pGleda.id){ akc.disabled = true; akc.textContent = 'Nosiš ✓'; }
+  else if(imam(pGleda)){ akc.disabled = false; akc.textContent = 'Stavi'; akc.onclick = () => { kasa.nosi[prodTab] = pGleda.id; sacuvajKasu(); zvuk('upis'); osveziProdavnicu(); }; }
+  else if(kasa.zetoni >= pGleda.cena){
+    akc.disabled = false; akc.textContent = 'Kupi za 🪙 ' + broj(pGleda.cena);
+    akc.onclick = () => { kasa.zetoni -= pGleda.cena; kasa.imam.push(pGleda.id); kasa.nosi[prodTab] = pGleda.id; sacuvajKasu(); zvuk('novcic'); vibriraj(30); tost('Kupljeno: ' + pGleda.ime); osveziProdavnicu(); };
+  } else { akc.disabled = true; akc.textContent = 'Fali ti 🪙 ' + broj(pGleda.cena - kasa.zetoni); }
+}
 
 /* ---------- pravila i bodovi ---------- */
 function osveziPravila(){
@@ -993,7 +1197,7 @@ document.addEventListener('visibilitychange', () => { if(document.hidden) sacuva
 
 osveziPocetnu();
 if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/Aplikacije/farkle/sw.js').catch(() => {});
-window.__farkle = { zauzet: () => zauzet, stanje: () => G, postavi: g => { G = g; izbor = new Set(); crtajSve(false); } }; // za automatske probe
+window.__farkle = { kasa: () => kasa, zauzet: () => zauzet, stanje: () => G, postavi: g => { G = g; izbor = new Set(); crtajSve(false); } }; // za automatske probe
 })();
 </script>
 </body>
