@@ -21,6 +21,11 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   await p.goto(OSNOVA + '#posveta=' + b64);
   await p.waitForTimeout(800);
   ok((await p.textContent('#posvetaTekst')) === posveta, 'posveta iz linka prikazana');
+  ok(await p.isVisible('#prozorRuka'), 'prvi put: pita koja ruka');
+  await slika('1b-izbor-ruke');
+  await p.click('#izborRukePrvi button >> nth=0'); await p.waitForTimeout(300);
+  ok(!(await p.isVisible('#prozorRuka')), 'ruka izabrana, prozor zatvoren');
+  ok(await p.evaluate(() => window.__farkle.kasa().poklon === true), 'posveta otključala poklon');
   ok(!(await p.evaluate(() => location.hash)), 'posveta skinuta iz adrese');
   await slika('1-pocetna');
 
@@ -49,6 +54,14 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   await p.waitForTimeout(500);
   ok(await p.isVisible('#igra'), 'ekran igre');
   await slika('4-igra-start');
+  // ruka: kad čovek baci, ruka izađe, protrese i pusti kockice
+  if (await p.evaluate(() => { const g = window.__farkle.stanje(); return g.igraci[g.naPotezu].tip === 'covek'; })) {
+    await p.click('#dugmeBaci'); await p.waitForTimeout(550);
+    ok(await p.evaluate(() => document.querySelector('#rukaScena').classList.contains('gore') && !!document.querySelector('#rukaScena svg.zatvorena')), 'ruka gore, zatvorena, trese');
+    await slika('4b-ruka-trese');
+    await p.waitForTimeout(500);
+    await slika('4c-ruka-pusta');
+  }
   let snimljenoBira = false, snimljenFarkle = false, koraka = 0;
   const t0 = Date.now();
   while (Date.now() - t0 < 300000) {
@@ -80,6 +93,28 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   ok(zbir[0] === g.igraci[0].poeni && zbir[1] === g.igraci[1].poeni, 'dnevnik se slaže sa poenima');
   await p.click('#krajPocetna'); await p.waitForTimeout(500);
   ok((await p.textContent('#statistika')).includes('Protiv kompjutera'), 'statistika upisana');
+  const kasa = await p.evaluate(() => window.__farkle.kasa());
+  ok(kasa.zetoni >= 100 + 10 + 20, 'žetoni posle partije: ' + kasa.zetoni);
+  // prodavnica: probaj, kupi, stavi
+  await p.click('#dugmeProdavnica'); await p.waitForTimeout(400);
+  ok(await p.isVisible('#prodavnica'), 'prodavnica otvorena');
+  await p.click('.predmet[data-id="n-crvena"]'); await p.waitForTimeout(200);
+  ok(/Kupi/.test(await p.textContent('#prodAkcija')), 'dugme Kupi');
+  const pre2 = (await p.evaluate(() => window.__farkle.kasa())).zetoni;
+  await p.click('#prodAkcija'); await p.waitForTimeout(300);
+  const k2 = await p.evaluate(() => window.__farkle.kasa());
+  ok(k2.zetoni === pre2 - 60 && k2.imam.includes('n-crvena') && k2.nosi.nokti === 'n-crvena', 'kupljen crveni lak i nosi se');
+  await p.click('.predmet[data-id="n-srce"]'); await p.waitForTimeout(200);
+  ok((await p.textContent('#prodAkcija')) === 'Stavi', 'poklon nokti: besplatno, Stavi');
+  await p.click('#prodAkcija'); await p.waitForTimeout(200);
+  await p.click('#prodTabovi button >> text=Zglob'); await p.waitForTimeout(200);
+  await p.click('.predmet[data-id="z-sat-zlatni"]'); await p.waitForTimeout(200);
+  ok(/Fali/.test(await p.textContent('#prodAkcija')) || /Kupi/.test(await p.textContent('#prodAkcija')), 'skup sat: Fali ili Kupi');
+  await slika('10-prodavnica');
+  await p.click('#prodTabovi button >> text=Ruka'); await p.waitForTimeout(200);
+  await slika('11-prodavnica-ruka');
+  await p.click('#prodNazad'); await p.waitForTimeout(400);
+  ok(await p.isVisible('#pocetna'), 'iz prodavnice nazad na početnu');
 
   // čuvanje: partija na istom telefonu, baci, osveži stranu, nastavi
   await p.click('#dugmeLokalno');
