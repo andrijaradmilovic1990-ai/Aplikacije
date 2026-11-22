@@ -10,6 +10,8 @@
 
 **Fotografije ruku (od 22.11.2026):** muška ruka je fotografija (otvorena + pesnica; generisana u ChatGPT-u na zelenoj pozadini #00B140, pa izrezana po zelenoj boji). Slike NISU u ovom repou (`farkle/ruke/` je u `.gitignore`): služi ih worker `farkle-app` na putanji `/Aplikacije/farkle/ruke/*.webp` (kod sa ugrađenim slikama je u privatnom repou helena-sistem, `primena/workeri/farkle-app.js`). Opis u `index.html` → `FOTO` (veličina, koliko viri, sidra za prsten/sat/tetovažu u pikselima slike). Ruka bez fotografije (za sada ženska) ostaje nacrtana (`ruka.js`). Lokalna proba: slike ručno u `farkle/ruke/`.
 
+**Ukrasi na fotografskoj ruci (od 22.11.2026):** ne crtaju se, nego su slojevi slike. Postupak: u ChatGPT se ubaci slika ruke iz igre (zelena pozadina) uz tekst „Use this exact image. Add … Keep everything else identical …“; nova slika se poravna sa starom (OpenCV ORB + afino), razlika + boja metala daju masku ukrasa, zelena se skida, sloj se smanji na veličinu slike ruke. Sloj ide u worker (`ruke/m-<ukras>-o.webp`, `-p.webp`), a u `index.html` → `FOTO.<pol>.slojevi['<id ukrasa>']` = {src, x, y, w, h} u pikselima slike ruke. Na fotografskoj ruci prodavnica prikazuje samo ukrase koji imaju sloj (`ukrasPostoji`).
+
 **Podaci:** samo u telefonu (`localStorage`): `farkle_partija_v1` (partija u toku, nastavlja se posle zatvaranja), `farkle_podesavanja_v1`, `farkle_stat_v1`, `farkle_kasa_v1` (žetoni, kupljeno, šta se nosi, ruka). Nema baze.
 
 **Fajlovi:**
