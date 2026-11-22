@@ -9,7 +9,7 @@
     ulaz: 0,              // koliko mora u jednom potezu da bi se „ušlo" prvi put (0 = bez ulaza)
     visestruke: 'fiksno', // 'fiksno' (4 iste 1000, 5 iste 2000, 6 istih 3000) ili 'dupliranje' (svaka sledeća ×2)
     kenta: 1500,          // 1-2-3-4-5-6
-    triPara: 1500,        // 0 = ne važi
+    triPara: 750,         // 0 = ne važi (Andrijino pravilo: 750)
     cetiriIPar: 1500,     // samo uz 'fiksno'; 0 = ne važi
     dveTrojke: 2500,      // samo uz 'fiksno'; 0 = ne važi
     malaKenta: false,     // 1-5 = 500, 2-6 = 750
