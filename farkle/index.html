@@ -233,7 +233,7 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 .ruka-foto:not(.zatvorena) .slika.pesnica{opacity:0}
 .ruka-scena.trese .ruka-foto{animation:tresiRuku .12s ease-in-out infinite alternate}
 .izlog .ruka-foto .slika.pesnica{display:none}
-.izlog .ruka-foto{position:absolute;left:50%;top:8px;width:160px;transform:translateX(-50%)}
+.izlog .ruka-foto{position:absolute;left:50%;top:8px;width:142px;transform:translateX(-50%)}
 .izlog .ruka-foto .slika{position:relative}
 .izbor-ruke button .ruka-foto{height:170px;overflow:hidden;margin-bottom:.3rem}
 .izbor-ruke button .ruka-foto .slika.pesnica{display:none}
@@ -488,9 +488,15 @@ function rukaOpcije(probaj){
 /* fotografije pravih ruku (služi ih worker farkle-app; nisu u javnom repou) */
 const FOTO = {
   z: {
-    otvorena: { src:'/Aplikacije/farkle/ruke/z-otvorena.webp', w:600, h:1078, sirina:1, vid:.3, x:0, sidra:{} },
-    pesnica: { src:'/Aplikacije/farkle/ruke/z-pesnica.webp', w:389, h:887, sirina:.65, vid:.36, x:0, sidra:{} },
-    slojevi: {}
+    otvorena: { src:'/Aplikacije/farkle/ruke/z-otvorena.webp', w:600, h:1078, sirina:1, vid:.2, x:0, sidra:{} },
+    pesnica: { src:'/Aplikacije/farkle/ruke/z-pesnica.webp', w:389, h:887, sirina:.65, vid:.28, x:0, sidra:{} },
+    slojevi: {
+      'n-crvena': { otvorena:{ src:'/Aplikacije/farkle/ruke/z-lak-crveni-o.webp', x:1, y:2, w:595, h:432 }, pesnica:{ src:'/Aplikacije/farkle/ruke/z-lak-crveni-p.webp', x:51, y:4, w:61, h:69 } },
+      'n-nude': { otvorena:{ src:'/Aplikacije/farkle/ruke/z-lak-nude-o.webp', x:1, y:3, w:595, h:434 }, pesnica:{ src:'/Aplikacije/farkle/ruke/z-lak-nude-p.webp', x:49, y:4, w:64, h:71 } },
+      'n-francuski': { otvorena:{ src:'/Aplikacije/farkle/ruke/z-lak-francuski-o.webp', x:2, y:3, w:594, h:434 }, pesnica:{ src:'/Aplikacije/farkle/ruke/z-lak-francuski-p.webp', x:49, y:4, w:64, h:71 } },
+      'z-sat-zenski': { otvorena:{ src:'/Aplikacije/farkle/ruke/z-sat-zlatni-o.webp', x:267, y:795, w:221, h:100 }, pesnica:{ src:'/Aplikacije/farkle/ruke/z-sat-zlatni-p.webp', x:113, y:519, w:230, h:101 } },
+      'p-dijamant': { otvorena:{ src:'/Aplikacije/farkle/ruke/z-prsten-dijamant-o.webp', x:375, y:279, w:111, h:112 }, pesnica:{ src:'/Aplikacije/farkle/ruke/z-prsten-dijamant-p.webp', x:232, y:99, w:89, h:62 } }
+    }
   },
   m: {
     otvorena: { src:'/Aplikacije/farkle/ruke/m-otvorena.webp?v=2', w:600, h:864, sirina:1, vid:.12, x:0,
