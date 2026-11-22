@@ -228,11 +228,12 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 .ruka-foto .slika img{width:100%;height:auto;display:block;filter:drop-shadow(6px 14px 14px rgba(0,0,0,.4))}
 .ruka-foto .slika .ukrasi{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .ruka-foto .tet-foto{mix-blend-mode:multiply;opacity:.85}
+.ruka-foto .slika img.sloj{position:absolute;height:auto;filter:none}
 .ruka-foto.zatvorena .slika.otvorena{opacity:0}
 .ruka-foto:not(.zatvorena) .slika.pesnica{opacity:0}
 .ruka-scena.trese .ruka-foto{animation:tresiRuku .12s ease-in-out infinite alternate}
 .izlog .ruka-foto .slika.pesnica{display:none}
-.izlog .ruka-foto{position:absolute;left:50%;top:12px;width:235px;transform:translateX(-50%)}
+.izlog .ruka-foto{position:absolute;left:50%;top:8px;width:160px;transform:translateX(-50%)}
 .izlog .ruka-foto .slika{position:relative}
 .izbor-ruke button .ruka-foto{height:170px;overflow:hidden;margin-bottom:.3rem}
 .izbor-ruke button .ruka-foto .slika.pesnica{display:none}
@@ -467,7 +468,7 @@ function sacuvajKasu(){ sacuvaj(KASA_KLJ, kasa); }
 function imam(p){ return p.cena === 0 && !p.poklon ? true : p.poklon ? !!kasa.poklon : kasa.imam.includes(p.id); }
 function nosim(tip){
   const p = R.PO_ID[kasa.nosi[tip]];
-  return p && R.zaPol(p, kasa.pol || 'z') && imam(p) ? p.id : R.PODRAZUMEVANO[tip];
+  return p && R.zaPol(p, kasa.pol || 'z') && ukrasPostoji(p, kasa.pol || 'z') && imam(p) ? p.id : R.PODRAZUMEVANO[tip];
 }
 function rukaOpcije(probaj){
   const nosi = { nokti:nosim('nokti'), prsten:nosim('prsten'), zglob:nosim('zglob'), tetovaza:nosim('tetovaza') };
@@ -477,17 +478,26 @@ function rukaOpcije(probaj){
 /* fotografije pravih ruku (služi ih worker farkle-app; nisu u javnom repou) */
 const FOTO = {
   m: {
-    otvorena: { src:'/Aplikacije/farkle/ruke/m-otvorena.webp?v=2', w:600, h:864, sirina:1, vid:.3, x:0,
+    otvorena: { src:'/Aplikacije/farkle/ruke/m-otvorena.webp?v=2', w:600, h:864, sirina:1, vid:.12, x:0,
       sidra:{ prsten:{ x:445, y:309, s:52, u:3 }, zglob:{ x:352, y:703, s:220, u:0 }, tetovaza:{ x:347, y:518, s:70, u:-4 } } },
-    pesnica: { src:'/Aplikacije/farkle/ruke/m-pesnica.webp?v=2', w:372, h:770, sirina:.62, vid:.45, x:2,
-      sidra:{ zglob:{ x:201, y:394, s:210, u:0 }, tetovaza:{ x:184, y:271, s:60, u:-4 } } }
+    pesnica: { src:'/Aplikacije/farkle/ruke/m-pesnica.webp?v=2', w:372, h:770, sirina:.62, vid:.26, x:2,
+      sidra:{ zglob:{ x:201, y:394, s:210, u:0 }, tetovaza:{ x:184, y:271, s:60, u:-4 } } },
+    // ukrasi kao slojevi fotografije (izrezani iz ChatGPT slike iste ruke): x, y, w, h u pikselima slike ruke
+    slojevi: {
+      'z-sat-zlatni': { otvorena:{ src:'/Aplikacije/farkle/ruke/m-sat-zlatni-o.webp', x:237, y:670, w:229, h:194 },
+                        pesnica:{ src:'/Aplikacije/farkle/ruke/m-sat-zlatni-p.webp', x:87, y:443, w:221, h:121 } }
+    }
   }
 };
+// na fotografskoj ruci postoje samo ukrasi koji imaju svoj sloj (nacrtani preko fotografije izgledaju loše)
+function ukrasPostoji(p, pol){ const f = FOTO[pol]; return !f || p.cena === 0 && !p.poklon || !!(f.slojevi && f.slojevi[p.id]); }
 function rukaHTML(op, zatvorena){
   const f = FOTO[op.pol];
   if(!f){ const svg = R.nacrtaj(op); return zatvorena ? svg.replace('class="ruka-svg"', 'class="ruka-svg zatvorena"') : svg; }
+  const slojevi = ime => Object.values(op.nosi || {}).map(id => f.slojevi && f.slojevi[id] && f.slojevi[id][ime]).filter(Boolean)
+    .map(l => '<img class="sloj" src="' + l.src + '" alt="" draggable="false" style="left:' + (l.x / f[ime].w * 100) + '%;top:' + (l.y / f[ime].h * 100) + '%;width:' + (l.w / f[ime].w * 100) + '%">').join('');
   const slika = (ime, d) => '<div class="slika ' + ime + '" style="width:' + (d.sirina * 100) + '%;margin-left:' + d.x + '%;--vid:' + (d.vid * 100) + '%">' +
-    '<img src="' + d.src + '" width="' + d.w + '" height="' + d.h + '" alt="" draggable="false">' + R.ukrasiNaFoto(op, d.sidra, d.w, d.h) + '</div>';
+    '<img src="' + d.src + '" width="' + d.w + '" height="' + d.h + '" alt="" draggable="false">' + slojevi(ime) + '</div>';
   return '<div class="ruka-foto' + (zatvorena ? ' zatvorena' : '') + '">' + slika('pesnica', f.pesnica) + slika('otvorena', f.otvorena) + '</div>';
 }
 function otkljucajPoklon(){ if(!kasa.poklon){ kasa.poklon = true; sacuvajKasu(); setTimeout(() => tost('🎁 U Prodavnici te čeka poklon', 2600), 900); } }
@@ -1125,7 +1135,7 @@ function uzorak(p){
 }
 function osveziProdavnicu(){
   const pol = kasa.pol || 'z';
-  const tabovi = TABOVI.filter(([t]) => t !== 'nokti' || pol === 'z');
+  const tabovi = TABOVI.filter(([t]) => t === 'ruka' || (t !== 'nokti' || pol === 'z') && R.PREDMETI.some(p => p.tip === t && p.cena > 0 && R.zaPol(p, pol) && ukrasPostoji(p, pol)));
   if(!prodTab || !tabovi.some(([t]) => t === prodTab)) prodTab = tabovi[0][0];
   $('prodTabovi').innerHTML = '';
   tabovi.forEach(([t, ime]) => {
@@ -1148,7 +1158,7 @@ function osveziProdavnicu(){
     return;
   }
   akc.style.display = '';
-  const lista = R.PREDMETI.filter(p => p.tip === prodTab && R.zaPol(p, pol) && (!p.poklon || kasa.poklon));
+  const lista = R.PREDMETI.filter(p => p.tip === prodTab && R.zaPol(p, pol) && ukrasPostoji(p, pol) && (!p.poklon || kasa.poklon));
   const pGleda = gleda && R.PO_ID[gleda] && R.PO_ID[gleda].tip === prodTab ? R.PO_ID[gleda] : null;
   $('izlog').innerHTML = rukaHTML(rukaOpcije(pGleda));
   const nosi = nosim(prodTab);
