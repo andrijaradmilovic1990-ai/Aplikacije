@@ -5,7 +5,7 @@ function ok(uslov, opis) { if (uslov) prosli++; else { pali++; console.log('PALO
 function jed(a, b, opis) { ok(a === b, opis + ' (dobijeno ' + a + ', očekivano ' + b + ')'); }
 
 const FIX = F.pravila();
-jed(FIX.minUpis, 300, 'podrazumevano: upis od 300 svaki potez'); jed(FIX.ulaz, 0, 'podrazumevano: bez posebnog ulaza');
+jed(FIX.minUpis, 300, 'podrazumevano: upis od 300 svaki potez'); jed(FIX.triPara, 750, 'podrazumevano: tri para 750'); jed(FIX.ulaz, 0, 'podrazumevano: bez posebnog ulaza');
 const DUP = F.pravila({ visestruke: 'dupliranje' });
 const B = (k, r) => F.bodujIzbor(k, r || FIX);
 
@@ -19,22 +19,22 @@ jed(B([1, 1]), 200, 'dve jedinice'); jed(B([5, 5, 1, 1]), 300, 'dve petice i dve
 // --- fiksno
 jed(B([2, 2, 2, 2]), 1000, '4 iste fiksno'); jed(B([3, 3, 3, 3, 3]), 2000, '5 istih fiksno'); jed(B([4, 4, 4, 4, 4, 4]), 3000, '6 istih fiksno');
 jed(B([1, 1, 1, 1]), 1100, '4 jedinice fiksno: 1000 < 3×1+1 → tri jedinice + jedinica = 1100');
-jed(B([1, 2, 3, 4, 5, 6]), 1500, 'kenta'); jed(B([2, 2, 3, 3, 4, 4]), 1500, 'tri para');
-jed(B([2, 2, 2, 2, 3, 3]), 1500, 'četiri iste + par'); jed(B([2, 2, 2, 3, 3, 3]), 2500, 'dve trojke');
-jed(B([1, 1, 5, 5, 6, 6]), 1500, 'tri para veće od 1+1+5+5');
+jed(B([1, 2, 3, 4, 5, 6]), 1500, 'kenta'); jed(B([2, 2, 3, 3, 4, 4]), 750, 'tri para 750'); jed(B([6, 4, 2, 6, 2, 4]), 750, 'tri para bilo kojim redom');
+jed(B([2, 2, 2, 2, 3, 3]), 1500, 'četiri iste + par (veće od tri para)'); jed(B([2, 2, 2, 3, 3, 3]), 2500, 'dve trojke');
+jed(B([1, 1, 5, 5, 6, 6]), 750, 'tri para 750 veće od 1+1+5+5 = 300'); jed(B([1, 1, 5, 5, 1, 1]), 1500, 'četiri jedinice + par petica: 1500 (više od 1200 i od tri para)');
 jed(B([2, 2, 3, 3, 4, 6]), 0, 'ništa ne boduje u 6');
 jed(B([1, 2, 3, 4, 5]), 0, 'mala kenta isključena: 2, 3 i 4 ne boduju, pa izbor ne važi');
 jed(F.bodujIzbor([1, 2, 3, 4, 5], F.pravila({ malaKenta: true })), 500, 'mala kenta 1-5');
 jed(F.bodujIzbor([2, 3, 4, 5, 6], F.pravila({ malaKenta: true })), 750, 'mala kenta 2-6');
 jed(F.bodujIzbor([1, 2, 3, 4, 5, 5], F.pravila({ malaKenta: true })), 550, 'mala kenta + petica');
 jed(F.bodujIzbor([2, 2, 3, 3, 4, 4], F.pravila({ triPara: 0 })), 0, 'tri para isključena');
-jed(F.bodujIzbor([2, 2, 3, 3, 4, 4], F.pravila({ triPara: 750 })), 750, 'tri para 750');
+jed(F.bodujIzbor([2, 2, 3, 3, 4, 4], F.pravila({ triPara: 1500 })), 1500, 'tri para 1500 kad se tako podesi');
 // --- dupliranje
 jed(B([2, 2, 2, 2], DUP), 400, '4 dvojke duplo'); jed(B([2, 2, 2, 2, 2], DUP), 800, '5 dvojki duplo');
 jed(B([2, 2, 2, 2, 2, 2], DUP), 1600, '6 dvojki duplo'); jed(B([1, 1, 1, 1], DUP), 2000, '4 jedinice duplo');
 jed(B([1, 1, 1, 1, 1, 1], DUP), 8000, '6 jedinica duplo'); jed(B([6, 6, 6, 6, 6], DUP), 2400, '5 šestica duplo');
 jed(B([2, 2, 2, 3, 3, 3], DUP), 500, 'dve trojke u dupliranju = 200+300 (nema bonusa)');
-jed(B([2, 2, 2, 2, 3, 3], DUP), 1500, 'četiri+par u dupliranju važi kao tri para');
+jed(B([2, 2, 2, 2, 3, 3], DUP), 750, 'četiri+par u dupliranju važi kao tri para');
 // --- izbor mora biti podskup ispravnih vrednosti
 let baca = false; try { F.bodujIzbor([7], FIX); } catch (e) { baca = true; } ok(baca, 'kockica 7 baca grešku');
 
@@ -77,7 +77,7 @@ g = F.posleFarkla(g); jed(g.naPotezu, 0, 'posle farkla nazad na A'); jed(g.krug,
 // vruće kockice: A uzme sve
 g = F.baci(g, niz(1, 1, 5, 5, 6, 6)); g = F.baci(g, niz(2, 3, 4, 6, 2, 3), [0, 1, 2, 3, 4, 5]);
 jed(g.potez.faza, 'farkle', 'posle vrućih kockica baca šest i padne');
-jed(g.potez.izgubljeno, 1500, 'izgubljeno 1500');
+jed(g.potez.izgubljeno, 750, 'izgubljeno 750 (tri para)');
 g = F.posleFarkla(g); jed(g.igraci[0].poeni, 1000, 'poeni posle farkla netaknuti');
 g = F.baci(g, niz(5, 2, 2, 3, 4, 6)); g = F.baci(g, niz(1, 1, 1, 2, 3), [0]);
 jed(g.potez.slobodnih, 5, 'ostalo 5 kockica'); jed(g.potez.poeni, 50, 'u potezu 50');

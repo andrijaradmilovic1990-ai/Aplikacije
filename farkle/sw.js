@@ -1,4 +1,4 @@
-const CACHE='farkle-v2';
+const CACHE='farkle-v3';
 const ASSETS=['/Aplikacije/farkle/','/Aplikacije/farkle/index.html','/Aplikacije/farkle/engine.js','/Aplikacije/farkle/manifest.json','/Aplikacije/farkle/icon-192.png','/Aplikacije/farkle/icon-512.png','/Aplikacije/farkle/icon-maskable.png'];
 
 self.addEventListener('install',e=>{
