@@ -4,8 +4,14 @@ let prosli = 0, pali = 0;
 function ok(uslov, opis) { if (uslov) prosli++; else { pali++; console.log('PALO: ' + opis); } }
 function jed(a, b, opis) { ok(a === b, opis + ' (dobijeno ' + a + ', očekivano ' + b + ')'); }
 
-const FIX = F.pravila();
-jed(FIX.minUpis, 300, 'podrazumevano: upis od 300 svaki potez'); jed(FIX.triPara, 750, 'podrazumevano: tri para 750'); jed(FIX.ulaz, 0, 'podrazumevano: bez posebnog ulaza');
+const PODR = F.pravila();
+const FIX = F.pravila({ visestruke: 'fiksno' });
+jed(PODR.visestruke, 'dupliranje', 'podrazumevano: četiri iste dupliraju');
+jed(F.bodujIzbor([1, 1, 1, 1], PODR), 2000, 'četiri keca = 2000'); jed(F.bodujIzbor([2, 2, 2, 2], PODR), 400, 'četiri dvojke = 400');
+jed(F.bodujIzbor([1, 1, 1, 1, 6, 6], PODR), 0, 'četiri keca + dve šestice: šestice ne mogu (nisu tri para)');
+jed(F.bodujIzbor([1, 1, 1, 1, 5, 5], PODR), 2100, 'četiri keca + dve petice = 2100');
+jed(F.bodujIzbor([1, 1, 1, 1], FIX), 1100, 'fiksno (opcija): četiri keca kao trojka + kec');
+jed(PODR.minUpis, 300, 'podrazumevano: upis od 300 svaki potez'); jed(PODR.triPara, 750, 'podrazumevano: tri para 750'); jed(PODR.ulaz, 0, 'podrazumevano: bez posebnog ulaza');
 const DUP = F.pravila({ visestruke: 'dupliranje' });
 const B = (k, r) => F.bodujIzbor(k, r || FIX);
 
@@ -34,7 +40,7 @@ jed(B([2, 2, 2, 2], DUP), 400, '4 dvojke duplo'); jed(B([2, 2, 2, 2, 2], DUP), 8
 jed(B([2, 2, 2, 2, 2, 2], DUP), 1600, '6 dvojki duplo'); jed(B([1, 1, 1, 1], DUP), 2000, '4 jedinice duplo');
 jed(B([1, 1, 1, 1, 1, 1], DUP), 8000, '6 jedinica duplo'); jed(B([6, 6, 6, 6, 6], DUP), 2400, '5 šestica duplo');
 jed(B([2, 2, 2, 3, 3, 3], DUP), 500, 'dve trojke u dupliranju = 200+300 (nema bonusa)');
-jed(B([2, 2, 2, 2, 3, 3], DUP), 750, 'četiri+par u dupliranju važi kao tri para');
+jed(B([2, 2, 2, 2, 3, 3], DUP), 0, 'četiri+par u dupliranju nisu tri para (trojke ne boduju)');
 // --- izbor mora biti podskup ispravnih vrednosti
 let baca = false; try { F.bodujIzbor([7], FIX); } catch (e) { baca = true; } ok(baca, 'kockica 7 baca grešku');
 

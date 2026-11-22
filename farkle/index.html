@@ -383,7 +383,7 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
       <div class="polje-forme"><label>Igra se do</label><div class="segment" data-pravilo="cilj"><button data-v="3000">3.000</button><button data-v="5000">5.000</button><button data-v="10000">10.000</button></div></div>
       <div class="polje-forme"><label>Najmanje za upis (svaki potez)</label><div class="segment" data-pravilo="minUpis"><button data-v="0">bez</button><button data-v="300">300</button><button data-v="350">350</button><button data-v="500">500</button></div></div>
       <div class="polje-forme"><label>Ulaz u igru (samo prvi upis)</label><div class="segment" data-pravilo="ulaz"><button data-v="0">bez</button><button data-v="500">500</button><button data-v="1000">1.000</button></div></div>
-      <div class="polje-forme"><label>Četiri, pet i šest istih</label><div class="segment" data-pravilo="visestruke"><button data-v="fiksno">1000 · 2000 · 3000</button><button data-v="dupliranje">dupliranje</button></div></div>
+      <div class="polje-forme"><label>Četiri, pet i šest istih</label><div class="segment" data-pravilo="visestruke"><button data-v="dupliranje">dupliranje</button><button data-v="fiksno">1000 · 2000 · 3000</button></div></div>
       <div class="polje-forme"><label>Tri para</label><div class="segment" data-pravilo="triPara"><button data-v="750">750</button><button data-v="1500">1.500</button><button data-v="0">ne važi</button></div></div>
       <div class="prekidac" data-prekidac="malaKenta"><div class="opis">Mala kenta<small>1-2-3-4-5 = 500 · 2-3-4-5-6 = 750</small></div><div class="sviter"></div></div>
       <div class="prekidac" data-prekidac="kaznaTriFarkla"><div class="opis">Kazna za tri farkla zaredom<small>−1.000 poena</small></div><div class="sviter"></div></div>
@@ -452,10 +452,11 @@ const POD0 = { ruka:true, ime:'', tema:'auto', brzina:'normalna', zvuk:true, vib
   mod:'bot', imena:['Igrač 1','Igrač 2'], pravila:{} };
 let pod = Object.assign({}, POD0, ucitaj(KLJ.pod, {}));
 // pravila v2 (22.11.2026): upis od 300 u svakom potezu umesto ulaza od 500
-const staraPravila = (pod.pravilaV || 1) < 3;
+const staraPravila = (pod.pravilaV || 1) < 4;
 if((pod.pravilaV || 1) < 2){ delete pod.pravila.ulaz; delete pod.pravila.minUpis; }
 if((pod.pravilaV || 1) < 3){ delete pod.pravila.triPara; } // v3 (22.11.2026): tri para 750
-pod.pravilaV = 3;
+if((pod.pravilaV || 1) < 4){ delete pod.pravila.visestruke; } // v4 (22.11.2026): četiri iste dupliraju
+pod.pravilaV = 4;
 pod.pravila = F.pravila(pod.pravila);
 if(staraPravila){ try{ localStorage.setItem(KLJ.pod, JSON.stringify(pod)); }catch(e){} }
 let stat = Object.assign({ lak:{p:0,i:0}, srednji:{p:0,i:0}, tezak:{p:0,i:0}, najPotez:0, partija:0 }, ucitaj(KLJ.stat, {}));
