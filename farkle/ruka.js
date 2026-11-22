@@ -263,7 +263,22 @@
     return o + '</svg>';
   }
 
-  var Ruka = { KOZA: KOZA, PREDMETI: PREDMETI, PO_ID: PO_ID, PODRAZUMEVANO: PODRAZUMEVANO, zaPol: zaPol, nagrada: nagrada, NAGRADA: NAGRADA, nacrtaj: nacrtaj };
+  /* Ukrasi preko fotografije ruke: sidra su u pikselima slike {x, y, s (širina), u (ugao)} */
+  function ukrasiNaFoto(op, sidra, W, H) {
+    var nosi = op.nosi || {}, px = 'f' + (++brojac) + '-', pol = op.pol === 'm' ? 'm' : 'z';
+    var pP = PO_ID[nosi.prsten], pZ = PO_ID[nosi.zglob], pT = PO_ID[nosi.tetovaza];
+    var o = '<svg class="ukrasi" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + definicije(px, KOZA.svetla);
+    function g(sd, sirina, sadrzaj, klasa) {
+      var k = sd.s / sirina;
+      return '<g' + (klasa ? ' class="' + klasa + '"' : '') + ' transform="translate(' + sd.x + ',' + sd.y + ') rotate(' + (sd.u || 0) + ') scale(' + k + ')">' + sadrzaj + '</g>';
+    }
+    if (sidra.tetovaza && pT && pT.crtez) o += g(sidra.tetovaza, 24, tetovaza(pT, 0, 0, 'z'), 'tet-foto');
+    if (sidra.zglob && pZ && pZ.id !== 'z-nema') o += g(sidra.zglob, 104, zglob(px, pZ, { l: -50, d: 50 }, -3));
+    if (sidra.prsten && pP && pP.id !== 'p-nema') o += g(sidra.prsten, 20, prsten(px, 0, -3, 17, pP, pol));
+    return o + '</svg>';
+  }
+
+  var Ruka = { ukrasiNaFoto: ukrasiNaFoto, KOZA: KOZA, PREDMETI: PREDMETI, PO_ID: PO_ID, PODRAZUMEVANO: PODRAZUMEVANO, zaPol: zaPol, nagrada: nagrada, NAGRADA: NAGRADA, nacrtaj: nacrtaj };
   if (typeof module !== 'undefined' && module.exports) module.exports = Ruka;
   else koren.Ruka = Ruka;
 })(this);
