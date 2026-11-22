@@ -7,7 +7,7 @@
     cilj: 10000,          // do koliko se igra
     minUpis: 300,         // najmanje što se sme upisati u SVAKOM potezu (0 = bez donje granice)
     ulaz: 0,              // koliko mora u jednom potezu da bi se „ušlo" prvi put (0 = bez ulaza)
-    visestruke: 'fiksno', // 'fiksno' (4 iste 1000, 5 iste 2000, 6 istih 3000) ili 'dupliranje' (svaka sledeća ×2)
+    visestruke: 'dupliranje', // 'dupliranje' (svaka sledeća ×2: 4 keca 2000, 4 dvojke 400 — Andrijino pravilo) ili 'fiksno' (1000/2000/3000)
     kenta: 1500,          // 1-2-3-4-5-6
     triPara: 750,         // 0 = ne važi (Andrijino pravilo: 750)
     cetiriIPar: 1500,     // samo uz 'fiksno'; 0 = ne važi
@@ -80,9 +80,8 @@
       var parovi = 0, trojke = 0, cetvorke = 0, dvojke = 0, sve = true;
       for (var v = 1; v <= 6; v++) {
         if (c[v] !== 1) sve = false;
-        if (c[v] === 2) { parovi++; dvojke++; }
-        if (c[v] === 4) { parovi += 2; cetvorke++; }
-        if (c[v] === 6) parovi += 3;
+        if (c[v] === 2) { parovi++; dvojke++; }   // tri para = tri RAZLIČITA para (četiri iste nisu dva para)
+        if (c[v] === 4) cetvorke++;
         if (c[v] === 3) trojke++;
       }
       if (sve && r.kenta > 0) najbolje = Math.max(najbolje, r.kenta);
