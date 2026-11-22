@@ -1,0 +1,17 @@
+{
+  "id": "/Aplikacije/farkle/",
+  "name": "Farkle",
+  "short_name": "Farkle",
+  "description": "Igra kockicama",
+  "start_url": "/Aplikacije/farkle/",
+  "scope": "/Aplikacije/farkle/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1311",
+  "theme_color": "#0e1311",
+  "icons": [
+    { "src": "/Aplikacije/farkle/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/Aplikacije/farkle/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/Aplikacije/farkle/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

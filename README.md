@@ -7,13 +7,14 @@ Male aplikacije za telefon. **Svaka aplikacija = svoj folder** sa svojim `UPUTST
 | `skola/` | Škola — samoobrazovanje (70 lekcija, ponavljanje) | https://skola-app.andrija-radmilovic1990.workers.dev | `skola/UPUTSTVO.md` |
 | `brzi/` | Brzi unos — trošak u Budžet jednim potezom | https://brzi-app.andrija-radmilovic1990.workers.dev | `brzi/UPUTSTVO.md` |
 | `pisanje/` | Pisalnica — pisanje priča | https://pisanje-app.andrija-radmilovic1990.workers.dev (tekstovi u telefonu; jednom preneti sa github.io) | `pisanje/UPUTSTVO.md` |
+| `farkle/` | Farkle — igra kockicama (protiv kompjutera ili na istom telefonu) | https://farkle-app.andrija-radmilovic1990.workers.dev | `farkle/UPUTSTVO.md` |
 
 Budžet nije ovde — ima svoj repo **Budzet**.
 
 ## Kako radi
 
-- Fajlovi se objavljuju preko GitHub Pages (`https://andrijaradmilovic1990-ai.github.io/Aplikacije/<folder>/`). Telefon ih otvara na **svojoj** adresi: Cloudflare worker (`skola-app`, `brzi-app`, `pisanje-app`) samo prenosi fajlove sa Pages. Razlog: telefon ne pušta dve instalirane aplikacije sa iste adrese. Na github.io stranica sama preusmerava na svoju adresu (osim sa `?proba`).
-- Podaci: Škola i Brzi unos — ista Firebase baza i ista Google prijava kao Budžet (`budzet-f3992`). Pisalnica čuva tekstove samo u telefonu (bez baze). Nova adresa mora u Firebase → Authentication → Authorized domains.
+- Fajlovi se objavljuju preko GitHub Pages (`https://andrijaradmilovic1990-ai.github.io/Aplikacije/<folder>/`). Telefon ih otvara na **svojoj** adresi: Cloudflare worker (`skola-app`, `brzi-app`, `pisanje-app`, `farkle-app`) samo prenosi fajlove sa Pages. Razlog: telefon ne pušta dve instalirane aplikacije sa iste adrese. Na github.io stranica sama preusmerava na svoju adresu (osim sa `?proba`).
+- Podaci: Škola i Brzi unos — ista Firebase baza i ista Google prijava kao Budžet (`budzet-f3992`). Pisalnica i Farkle čuvaju sve samo u telefonu (bez baze). Nova adresa mora u Firebase → Authentication → Authorized domains.
 - Menja se SAMO ovde, u repou; worker se ne dira.
 
 ## Nova aplikacija
