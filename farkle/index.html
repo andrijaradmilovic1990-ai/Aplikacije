@@ -221,6 +221,22 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 .ruka-svg.zatvorena .prst{transform:scaleY(.34)}
 .ruka-svg.zatvorena .nokat{opacity:0}
 .ruka-svg.zatvorena .palac{transform:rotate(32deg) scaleY(.75)}
+.ruka-scena.foto{width:min(50%,205px);transform:translate(-50%,0);height:0;bottom:0;transition:none}
+.ruka-foto{position:relative}
+.ruka-scena .ruka-foto .slika{position:absolute;left:50%;bottom:0;transform:translate(-50%,105%);transition:transform .32s cubic-bezier(.3,.7,.3,1),opacity .12s}
+.ruka-scena.gore .ruka-foto .slika{transform:translate(-50%,var(--vid))}
+.ruka-foto .slika img{width:100%;height:auto;display:block;filter:drop-shadow(6px 14px 14px rgba(0,0,0,.4))}
+.ruka-foto .slika .ukrasi{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ruka-foto .tet-foto{mix-blend-mode:multiply;opacity:.85}
+.ruka-foto.zatvorena .slika.otvorena{opacity:0}
+.ruka-foto:not(.zatvorena) .slika.pesnica{opacity:0}
+.ruka-scena.trese .ruka-foto{animation:tresiRuku .12s ease-in-out infinite alternate}
+.izlog .ruka-foto .slika.pesnica{display:none}
+.izlog .ruka-foto{position:absolute;left:50%;top:12px;width:235px;transform:translateX(-50%)}
+.izlog .ruka-foto .slika{position:relative}
+.izbor-ruke button .ruka-foto{height:170px;overflow:hidden;margin-bottom:.3rem}
+.izbor-ruke button .ruka-foto .slika.pesnica{display:none}
+.izbor-ruke button .ruka-foto .slika{width:120px;margin:0 auto;position:relative}
 .kocka.skace-ruka .omotac{animation:izRuke 1s cubic-bezier(.3,.6,.4,1)}
 @keyframes izRuke{0%{transform:translateY(170px) scale(.45);opacity:0}12%{opacity:1}40%{transform:translateY(-28px) scale(1.08)}60%{transform:translateY(4px)}80%{transform:translateY(-6px)}100%{transform:none}}
 /* žetoni i prodavnica */
@@ -458,6 +474,22 @@ function rukaOpcije(probaj){
   if(probaj) nosi[probaj.tip] = probaj.id;
   return { pol:kasa.pol || 'z', koza:kasa.koza, nosi };
 }
+/* fotografije pravih ruku (služi ih worker farkle-app; nisu u javnom repou) */
+const FOTO = {
+  m: {
+    otvorena: { src:'/Aplikacije/farkle/ruke/m-otvorena.webp', w:600, h:730, sirina:1, vid:.3, x:-4,
+      sidra:{ prsten:{ x:322, y:182, s:50, u:-8 }, zglob:{ x:322, y:505, s:250, u:-30 }, tetovaza:{ x:272, y:300, s:64, u:-12 } } },
+    pesnica: { src:'/Aplikacije/farkle/ruke/m-pesnica.webp', w:440, h:598, sirina:.7, vid:.3, x:0,
+      sidra:{ zglob:{ x:250, y:440, s:236, u:-14 }, tetovaza:{ x:225, y:265, s:56, u:-6 } } }
+  }
+};
+function rukaHTML(op, zatvorena){
+  const f = FOTO[op.pol];
+  if(!f){ const svg = R.nacrtaj(op); return zatvorena ? svg.replace('class="ruka-svg"', 'class="ruka-svg zatvorena"') : svg; }
+  const slika = (ime, d) => '<div class="slika ' + ime + '" style="width:' + (d.sirina * 100) + '%;margin-left:' + d.x + '%;--vid:' + (d.vid * 100) + '%">' +
+    '<img src="' + d.src + '" width="' + d.w + '" height="' + d.h + '" alt="" draggable="false">' + R.ukrasiNaFoto(op, d.sidra, d.w, d.h) + '</div>';
+  return '<div class="ruka-foto' + (zatvorena ? ' zatvorena' : '') + '">' + slika('pesnica', f.pesnica) + slika('otvorena', f.otvorena) + '</div>';
+}
 function otkljucajPoklon(){ if(!kasa.poklon){ kasa.poklon = true; sacuvajKasu(); setTimeout(() => tost('🎁 U Prodavnici te čeka poklon', 2600), 900); } }
 
 // posveta iz linka: #posveta=<base64url> (ostaje samo u ovom telefonu)
@@ -653,7 +685,7 @@ function pitajRuku(){
   el.innerHTML = '';
   [['z', 'Ženska'], ['m', 'Muška']].forEach(([pol, ime]) => {
     const b = document.createElement('button');
-    b.innerHTML = R.nacrtaj({ pol, koza:kasa.koza, nosi:{} }) + ime;
+    b.innerHTML = rukaHTML({ pol, koza:kasa.koza, nosi:{} }) + ime;
     b.onclick = () => { kasa.pol = pol; sacuvajKasu(); $('prozorRuka').classList.remove('vidljiv'); osveziPocetnu(); };
     el.appendChild(b);
   });
@@ -785,8 +817,10 @@ function crtajSacuvano(){
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function bacanjeRukom(){
   const sc = $('rukaScena');
-  sc.innerHTML = R.nacrtaj(rukaOpcije());
-  const svg = sc.querySelector('svg'); svg.classList.add('zatvorena');
+  const op = rukaOpcije();
+  sc.innerHTML = rukaHTML(op, true);
+  sc.classList.toggle('foto', !!FOTO[op.pol]);
+  const svg = sc.firstElementChild;
   void sc.offsetWidth;
   sc.classList.add('gore');
   await sleep(300);
@@ -1102,12 +1136,12 @@ function osveziProdavnicu(){
   $('prodZetoni').textContent = '🪙 ' + broj(kasa.zetoni);
   const sad = $('prodSadrzaj'), akc = $('prodAkcija');
   if(prodTab === 'ruka'){
-    $('izlog').innerHTML = R.nacrtaj(rukaOpcije());
+    $('izlog').innerHTML = rukaHTML(rukaOpcije());
     let h = '<div class="izbor-ruke">';
-    [['z', 'Ženska'], ['m', 'Muška']].forEach(([p, ime]) => { h += '<button data-pol="' + p + '" class="' + (pol === p ? 'izabran' : '') + '">' + R.nacrtaj({ pol:p, koza:kasa.koza, nosi:{} }) + ime + '</button>'; });
-    h += '</div><div class="koze">';
+    [['z', 'Ženska'], ['m', 'Muška']].forEach(([p, ime]) => { h += '<button data-pol="' + p + '" class="' + (pol === p ? 'izabran' : '') + '">' + rukaHTML({ pol:p, koza:kasa.koza, nosi:{} }) + ime + '</button>'; });
+    h += '</div>' + (FOTO[pol] ? '' : '<div class="koze">');
     Object.keys(R.KOZA).forEach(k => { h += '<button data-koza="' + k + '" title="' + R.KOZA[k].ime + '" class="' + (kasa.koza === k ? 'izabran' : '') + '" style="background:' + R.KOZA[k].a + '"></button>'; });
-    sad.innerHTML = h + '</div>';
+    sad.innerHTML = h + (FOTO[pol] ? '' : '</div>');
     sad.querySelectorAll('[data-pol]').forEach(b => b.onclick = () => { kasa.pol = b.dataset.pol; sacuvajKasu(); osveziProdavnicu(); });
     sad.querySelectorAll('[data-koza]').forEach(b => b.onclick = () => { kasa.koza = b.dataset.koza; sacuvajKasu(); osveziProdavnicu(); });
     akc.style.display = 'none';
@@ -1116,7 +1150,7 @@ function osveziProdavnicu(){
   akc.style.display = '';
   const lista = R.PREDMETI.filter(p => p.tip === prodTab && R.zaPol(p, pol) && (!p.poklon || kasa.poklon));
   const pGleda = gleda && R.PO_ID[gleda] && R.PO_ID[gleda].tip === prodTab ? R.PO_ID[gleda] : null;
-  $('izlog').innerHTML = R.nacrtaj(rukaOpcije(pGleda));
+  $('izlog').innerHTML = rukaHTML(rukaOpcije(pGleda));
   const nosi = nosim(prodTab);
   sad.innerHTML = '<div class="mreza">' + lista.map(p => {
     const st = nosi === p.id ? '<span class="cena nosi">✓ nosiš</span>' : imam(p) ? '<span class="cena ima">imaš</span>' : '<span class="cena">🪙 ' + broj(p.cena) + '</span>';
