@@ -5,7 +5,8 @@
 
   var PODRAZUMEVANA = {
     cilj: 10000,          // do koliko se igra
-    ulaz: 500,            // koliko mora u jednom potezu da bi se „ušlo" (0 = bez ulaza)
+    minUpis: 300,         // najmanje što se sme upisati u SVAKOM potezu (0 = bez donje granice)
+    ulaz: 0,              // koliko mora u jednom potezu da bi se „ušlo" prvi put (0 = bez ulaza)
     visestruke: 'fiksno', // 'fiksno' (4 iste 1000, 5 iste 2000, 6 istih 3000) ili 'dupliranje' (svaka sledeća ×2)
     kenta: 1500,          // 1-2-3-4-5-6
     triPara: 1500,        // 0 = ne važi
@@ -200,8 +201,11 @@
     var pr = proveriIzbor(g, indeksi);
     if (!pr.ok) return pr;
     var ukupno = t.poeni + pr.poeni;
-    if (!ja.naTabli && ukupno < g.pravila.ulaz)
+    var min = g.pravila.minUpis || 0;
+    if (!ja.naTabli && ukupno < g.pravila.ulaz && g.pravila.ulaz > min)
       return { ok: false, razlog: 'Za ulazak treba bar ' + g.pravila.ulaz + ' u jednom potezu.', ukupno: ukupno };
+    if (ukupno < min)
+      return { ok: false, razlog: 'Upisuje se tek od ' + min + ' — bacaj dalje.', ukupno: ukupno };
     return { ok: true, ukupno: ukupno, poeni: pr.poeni };
   }
 
@@ -254,7 +258,7 @@
 
   /* ---------- kompjuter ---------- */
   var VEROVATNOCA_FARKLA = [1, 2 / 3, 4 / 9, 5 / 18, 0.157, 0.077, 0.0231];
-  var PRAG = { lak: [0, 250, 300, 350, 400, 500, 99999], srednji: [0, 300, 300, 400, 700, 1500, 99999], tezak: [0, 300, 300, 400, 1000, 2500, 99999] };
+  var PRAG = { lak: [0, 550, 450, 350, 300, 300, 300], srednji: [0, 300, 300, 400, 700, 1500, 99999], tezak: [0, 300, 300, 400, 1000, 2500, 99999] };
 
   function izborHeuristika(izbori, bacanjeDuzina, tezina) {
     var naj = null, najV = -1;
@@ -291,7 +295,7 @@
     var t = g.potez, r = g.pravila, ja = g.igraci[g.naPotezu];
     var izbori = izboriKojiBoduju(t.bacanje, r);
     if (!izbori.length) return null;
-    var minUpis = ja.naTabli ? 0 : r.ulaz;
+    var minUpis = Math.max(r.minUpis || 0, ja.naTabli ? 0 : r.ulaz);
     var vodja = 0;
     g.igraci.forEach(function (x, i) { if (i !== g.naPotezu && x.poeni > vodja) vodja = x.poeni; });
     var poslednjaPrilika = g.okidac !== null; // neko je prešao cilj: ovo mi je poslednji potez

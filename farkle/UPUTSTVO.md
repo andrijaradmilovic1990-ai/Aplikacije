@@ -1,6 +1,6 @@
 # Farkle — uputstvo
 
-**Šta je:** igra kockicama farkle za telefon. Igra se protiv kompjutera (lak, srednji, težak) ili 2–4 igrača na istom telefonu. Pravila se mogu podesiti: cilj, ulaz, četiri/pet/šest istih (fiksno ili dupliranje), tri para, mala kenta, kazna za tri farkla i poslednja šansa. Ima zvuk, vibraciju, tamnu i svetlu temu, statistiku i posvetu na početnom ekranu. Radi i bez interneta.
+**Šta je:** igra kockicama farkle za telefon. Igra se protiv kompjutera (lak, srednji, težak) ili 2–4 igrača na istom telefonu. Pravila se mogu podesiti: cilj, najmanje za upis u svakom potezu (podrazumevano 300 — Andrijino pravilo), ulaz za prvi upis, četiri/pet/šest istih (fiksno ili dupliranje), tri para, mala kenta, kazna za tri farkla i poslednja šansa. Ima zvuk, vibraciju, tamnu i svetlu temu, statistiku i posvetu na početnom ekranu. Radi i bez interneta.
 
 **Adresa za telefon:** https://farkle-app.andrija-radmilovic1990.workers.dev — worker `farkle-app` prenosi `/Aplikacije/farkle/` sa Pages. Na github.io stranica preusmerava na tu adresu (osim sa `?proba`).
 
@@ -14,7 +14,7 @@
 - `manifest.json`, `sw.js` (keš; kod izmene podići `CACHE`), ikone.
 
 **Testovi:**
-- `node farkle/testovi/test-engine.js` — bodovanje (oba načina), tačne verovatnoće farkla (iscrpno), tok partije, ulaz, vruće kockice, poslednja šansa, kazna, kompjuter (160 celih partija). Očekivano: SVE PROŠLO.
+- `node farkle/testovi/test-engine.js` — bodovanje (oba načina), tačne verovatnoće farkla (iscrpno), tok partije, upis od 300, ulaz, vruće kockice, poslednja šansa, kazna, kompjuter (160 celih partija). Očekivano: SVE PROŠLO.
 - `node farkle/testovi/test-ekran.js http://localhost:8765 [folder-za-slike]` — prava aplikacija u Chromium-u na ekranu Pixel 7: posveta, podešavanja, cela partija protiv teškog kompjutera, nastavak posle osvežavanja, strane kockica. Lokalno: folder sa simlinkom `Aplikacije` → koren repoa, pa `python3 -m http.server 8765` u njemu.
 
 **Dogradnja:** deo 2 (igra preko interneta) — worker drži sto, kockice baca worker. Pravila i bodovanje ostaju u `engine.js`.
