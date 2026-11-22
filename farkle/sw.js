@@ -1,5 +1,5 @@
-const CACHE='farkle-v5';
-const ASSETS=['/Aplikacije/farkle/','/Aplikacije/farkle/index.html','/Aplikacije/farkle/engine.js','/Aplikacije/farkle/ruka.js','/Aplikacije/farkle/ruke/m-otvorena.webp','/Aplikacije/farkle/ruke/m-pesnica.webp','/Aplikacije/farkle/manifest.json','/Aplikacije/farkle/icon-192.png','/Aplikacije/farkle/icon-512.png','/Aplikacije/farkle/icon-maskable.png'];
+const CACHE='farkle-v6';
+const ASSETS=['/Aplikacije/farkle/','/Aplikacije/farkle/index.html','/Aplikacije/farkle/engine.js','/Aplikacije/farkle/ruka.js','/Aplikacije/farkle/ruke/m-otvorena.webp?v=2','/Aplikacije/farkle/ruke/m-pesnica.webp?v=2','/Aplikacije/farkle/manifest.json','/Aplikacije/farkle/icon-192.png','/Aplikacije/farkle/icon-512.png','/Aplikacije/farkle/icon-maskable.png'];
 
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>Promise.all(ASSETS.map(a=>c.add(a).catch(()=>{})))).then(()=>self.skipWaiting()));
