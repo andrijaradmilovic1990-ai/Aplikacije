@@ -30,50 +30,28 @@
 
   /* ---------- katalog ---------- */
   // tip: nokti | prsten | zglob | tetovaza · pol: z | m | (oba) · poklon: dobija se samo linkom
+  // Katalog za prave (fotografske) ruke, 22.11.2026: samo ukrasi koji imaju svoj sloj slike.
+  // Ukras bez sloja se u prodavnici ne prikazuje (index.html → ukrasPostoji).
   var PREDMETI = [
-    { id: 'n-prirodni', tip: 'nokti', pol: 'z', ime: 'Prirodni', cena: 0 },
-    { id: 'n-crvena', tip: 'nokti', pol: 'z', ime: 'Klasična crvena', cena: 60, boja: '#c1121f' },
-    { id: 'n-nude', tip: 'nokti', pol: 'z', ime: 'Nude', cena: 60, boja: '#d8a28a' },
-    { id: 'n-roze', tip: 'nokti', pol: 'z', ime: 'Pastel roze', cena: 80, boja: '#f3a3bf' },
-    { id: 'n-bordo', tip: 'nokti', pol: 'z', ime: 'Bordo', cena: 90, boja: '#6a0d22' },
-    { id: 'n-lila', tip: 'nokti', pol: 'z', ime: 'Lila', cena: 90, boja: '#b79ad8' },
-    { id: 'n-crna', tip: 'nokti', pol: 'z', ime: 'Crna', cena: 100, boja: '#141416' },
-    { id: 'n-francuski', tip: 'nokti', pol: 'z', ime: 'Francuski', cena: 160, sara: 'francuski' },
-    { id: 'n-tufne', tip: 'nokti', pol: 'z', ime: 'Tufne', cena: 200, sara: 'tufne' },
-    { id: 'n-ombre', tip: 'nokti', pol: 'z', ime: 'Ombre', cena: 240, sara: 'ombre' },
-    { id: 'n-sljokice', tip: 'nokti', pol: 'z', ime: 'Šljokice', cena: 280, sara: 'sljokice' },
-    { id: 'n-zlatni', tip: 'nokti', pol: 'z', ime: 'Zlatni', cena: 340, sara: 'zlatni' },
-    { id: 'n-leopard', tip: 'nokti', pol: 'z', ime: 'Leopard', cena: 400, sara: 'leopard' },
+    { id: 'n-prirodni', tip: 'nokti', pol: 'z', ime: 'Bez laka', cena: 0 },
+    { id: 'n-crvena', tip: 'nokti', pol: 'z', ime: 'Crveni lak', cena: 120, boja: '#c1121f' },
+    { id: 'n-nude', tip: 'nokti', pol: 'z', ime: 'Nude roze', cena: 120, boja: '#e3a9a0' },
+    { id: 'n-francuski', tip: 'nokti', pol: 'z', ime: 'Francuski manikir', cena: 220, sara: 'francuski' },
     { id: 'n-srce', tip: 'nokti', pol: 'z', ime: 'Srce', cena: 0, sara: 'srce', poklon: true },
 
     { id: 'p-nema', tip: 'prsten', ime: 'Bez prstena', cena: 0 },
-    { id: 'p-srebrni', tip: 'prsten', ime: 'Srebrni prsten', cena: 120, metal: 'srebro' },
-    { id: 'p-zlatni', tip: 'prsten', ime: 'Zlatni prsten', cena: 200, metal: 'zlato' },
-    { id: 'p-rubin', tip: 'prsten', ime: 'Prsten sa rubinom', cena: 380, metal: 'zlato', kamen: '#c3102c' },
-    { id: 'p-dijamant', tip: 'prsten', pol: 'z', ime: 'Prsten sa dijamantom', cena: 520, metal: 'srebro', kamen: '#e9f6ff' },
+    { id: 'p-dijamant', tip: 'prsten', pol: 'z', ime: 'Prsten sa dijamantom', cena: 450, metal: 'zlato', kamen: '#e9f6ff' },
     { id: 'p-pecatnjak', tip: 'prsten', pol: 'm', ime: 'Srebrni pečatnjak', cena: 320, metal: 'srebro', pecat: true },
-    { id: 'p-crni', tip: 'prsten', pol: 'm', ime: 'Crni prsten', cena: 220, metal: 'crni' },
 
     { id: 'z-nema', tip: 'zglob', ime: 'Ništa', cena: 0 },
-    { id: 'z-zlatna', tip: 'zglob', pol: 'z', ime: 'Zlatna narukvica', cena: 180, vrsta: 'lanac', metal: 'zlato' },
-    { id: 'z-srebrna', tip: 'zglob', ime: 'Srebrni lanac', cena: 160, vrsta: 'lanac', metal: 'srebro' },
-    { id: 'z-perle', tip: 'zglob', ime: 'Perlice', cena: 140, vrsta: 'perle' },
-    { id: 'z-biseri', tip: 'zglob', pol: 'z', ime: 'Biserna narukvica', cena: 280, vrsta: 'biseri' },
-    { id: 'z-privesci', tip: 'zglob', pol: 'z', ime: 'Narukvica sa privescima', cena: 360, vrsta: 'privesci' },
-    { id: 'z-koza', tip: 'zglob', pol: 'm', ime: 'Kožna narukvica', cena: 150, vrsta: 'koza' },
-    { id: 'z-sat-koza', tip: 'zglob', ime: 'Sat sa kožnim kaišem', cena: 300, vrsta: 'sat', kais: '#5a3720', okvir: 'srebro' },
-    { id: 'z-sat-celik', tip: 'zglob', ime: 'Čelični sat', cena: 450, vrsta: 'sat', kais: 'celik', okvir: 'srebro' },
-    { id: 'z-sat-zlatni', tip: 'zglob', ime: 'Zlatni sat', cena: 600, vrsta: 'sat', kais: 'zlato', okvir: 'zlato' },
-    { id: 'z-poklon', tip: 'zglob', ime: 'Poklon narukvica', cena: 0, vrsta: 'poklon', metal: 'zlato', poklon: true },
+    { id: 'z-sat-zenski', tip: 'zglob', pol: 'z', ime: 'Zlatni sat', cena: 600, vrsta: 'sat', kais: 'zlato', okvir: 'zlato' },
+    { id: 'z-sat-zlatni', tip: 'zglob', pol: 'm', ime: 'Zlatni sat', cena: 600, vrsta: 'sat', kais: 'zlato', okvir: 'zlato' },
+    { id: 'z-poklon', tip: 'zglob', pol: 'z', ime: 'Poklon narukvica', cena: 0, vrsta: 'poklon', metal: 'zlato', poklon: true },
 
-    { id: 't-nema', tip: 'tetovaza', ime: 'Bez tetovaže', cena: 0 },
-    { id: 't-kocka', tip: 'tetovaza', ime: 'Kockica', cena: 150, crtez: 'kocka' },
-    { id: 't-srce', tip: 'tetovaza', ime: 'Srce', cena: 150, crtez: 'srce' },
-    { id: 't-sidro', tip: 'tetovaza', ime: 'Sidro', cena: 200, crtez: 'sidro' },
-    { id: 't-pik', tip: 'tetovaza', ime: 'As pik', cena: 220, crtez: 'pik' },
-    { id: 't-ruza', tip: 'tetovaza', ime: 'Ruža', cena: 260, crtez: 'ruza' },
-    { id: 't-zvezda', tip: 'tetovaza', ime: 'Zvezda', cena: 180, crtez: 'zvezda' }
+    { id: 't-nema', tip: 'tetovaza', ime: 'Bez tetovaže', cena: 0 }
   ];
+  // stari katalog (nacrtana ruka): cene za povraćaj žetona onima koji su kupili nešto što više ne postoji
+  var STARE_CENE = {"n-prirodni": 0, "n-crvena": 60, "n-nude": 60, "n-roze": 80, "n-bordo": 90, "n-lila": 90, "n-crna": 100, "n-francuski": 160, "n-tufne": 200, "n-ombre": 240, "n-sljokice": 280, "n-zlatni": 340, "n-leopard": 400, "n-srce": 0, "p-nema": 0, "p-srebrni": 120, "p-zlatni": 200, "p-rubin": 380, "p-dijamant": 520, "p-pecatnjak": 320, "p-crni": 220, "z-nema": 0, "z-zlatna": 180, "z-srebrna": 160, "z-perle": 140, "z-biseri": 280, "z-privesci": 360, "z-koza": 150, "z-sat-koza": 300, "z-sat-celik": 450, "z-sat-zlatni": 600, "z-poklon": 0, "t-nema": 0, "t-kocka": 150, "t-srce": 150, "t-sidro": 200, "t-pik": 220, "t-ruza": 260, "t-zvezda": 180};
   var PO_ID = {};
   PREDMETI.forEach(function (p) { PO_ID[p.id] = p; });
   var PODRAZUMEVANO = { nokti: 'n-prirodni', prsten: 'p-nema', zglob: 'z-nema', tetovaza: 't-nema' };
@@ -278,7 +256,7 @@
     return o + '</svg>';
   }
 
-  var Ruka = { ukrasiNaFoto: ukrasiNaFoto, KOZA: KOZA, PREDMETI: PREDMETI, PO_ID: PO_ID, PODRAZUMEVANO: PODRAZUMEVANO, zaPol: zaPol, nagrada: nagrada, NAGRADA: NAGRADA, nacrtaj: nacrtaj };
+  var Ruka = { STARE_CENE: STARE_CENE, ukrasiNaFoto: ukrasiNaFoto, KOZA: KOZA, PREDMETI: PREDMETI, PO_ID: PO_ID, PODRAZUMEVANO: PODRAZUMEVANO, zaPol: zaPol, nagrada: nagrada, NAGRADA: NAGRADA, nacrtaj: nacrtaj };
   if (typeof module !== 'undefined' && module.exports) module.exports = Ruka;
   else koren.Ruka = Ruka;
 })(this);

@@ -465,6 +465,16 @@ function sacuvajPod(){ sacuvaj(KLJ.pod, pod); }
 const KASA_KLJ = 'farkle_kasa_v1';
 let kasa = Object.assign({ zetoni:100, imam:[], nosi:{}, pol:null, koza:'svetla', poklon:false, dan:'' }, ucitaj(KASA_KLJ, {}));
 function sacuvajKasu(){ sacuvaj(KASA_KLJ, kasa); }
+// nova prodavnica (22.11.2026): kupljeno iz starog kataloga, a više ne postoji, vraća se u žetonima
+(function(){
+  const nestalo = kasa.imam.filter(id => !R.PO_ID[id]);
+  if(!nestalo.length) return;
+  const povrat = nestalo.reduce((z, id) => z + (R.STARE_CENE[id] || 0), 0);
+  kasa.imam = kasa.imam.filter(id => R.PO_ID[id]);
+  Object.keys(kasa.nosi).forEach(t => { if(!R.PO_ID[kasa.nosi[t]]) delete kasa.nosi[t]; });
+  kasa.zetoni += povrat; sacuvajKasu();
+  if(povrat) setTimeout(() => tost('Nova prodavnica: vraćeno 🪙 ' + povrat), 1200);
+})();
 function imam(p){ return p.cena === 0 && !p.poklon ? true : p.poklon ? !!kasa.poklon : kasa.imam.includes(p.id); }
 function nosim(tip){
   const p = R.PO_ID[kasa.nosi[tip]];
@@ -1127,7 +1137,7 @@ function konfete(){
 
 
 /* ---------- prodavnica ---------- */
-const TABOVI = [['nokti', 'Nokti'], ['prsten', 'Prstenje'], ['zglob', 'Zglob'], ['tetovaza', 'Tetovaže'], ['ruka', 'Ruka']];
+const TABOVI = [['nokti', 'Nokti'], ['prsten', 'Prstenje'], ['zglob', 'Sat'], ['ruka', 'Ruka']];
 let prodTab = null, gleda = null;
 const UZORAK = {
   'n-prirodni':'#f2c4b4', 'n-francuski':'linear-gradient(180deg,#fff 0 32%,#f1cbbf 33%)', 'n-tufne':'radial-gradient(circle at 30% 30%,#fff 0 3px,transparent 3.5px) 0 0/12px 12px,#d7263d',

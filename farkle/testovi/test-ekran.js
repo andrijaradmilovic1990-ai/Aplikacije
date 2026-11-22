@@ -103,7 +103,7 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   await p.click('#prodTabovi button >> text=Ruka'); await p.waitForTimeout(200);
   await p.click('[data-pol=m]'); await p.waitForTimeout(300);
   ok((await p.evaluate(() => window.__farkle.kasa().pol)) === 'm', 'izabrana muška ruka');
-  await p.click('#prodTabovi button >> text=Zglob'); await p.waitForTimeout(200);
+  await p.click('#prodTabovi button >> text=Sat'); await p.waitForTimeout(200);
   await p.click('.predmet[data-id="z-sat-zlatni"]'); await p.waitForTimeout(300);
   ok(await p.waitForSelector('.izlog .slika.otvorena img.sloj', { state: 'visible', timeout: 5000 }).then(() => true, () => false), 'proba: sat se vidi na ruci pre kupovine');
   ok(/Kupi/.test(await p.textContent('#prodAkcija')), 'dugme Kupi');
