@@ -151,7 +151,7 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   await p.evaluate(() => { localStorage.setItem('farkle_podesavanja_v1', JSON.stringify({ pravila: { ulaz: 500, cilj: 10000 } })); });
   await p.reload(); await p.waitForTimeout(700);
   const pr = await p.evaluate(() => JSON.parse(localStorage.getItem('farkle_podesavanja_v1')).pravila);
-  ok(pr.ulaz === 0 && pr.minUpis === 300 && pr.triPara === 750 && pr.visestruke === 'dupliranje', 'stara podešavanja prevedena: ulaz ' + pr.ulaz + ', upis od ' + pr.minUpis);
+  ok(pr.ulaz === 0 && pr.minUpis === 300 && pr.triPara === 750 && pr.visestruke === 'zbir', 'stara podešavanja prevedena: ulaz ' + pr.ulaz + ', upis od ' + pr.minUpis);
 
   ok(greske.length === 0, 'bez grešaka u konzoli: ' + greske.join(' | '));
   await b.close();

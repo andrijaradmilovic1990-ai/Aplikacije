@@ -7,7 +7,7 @@
     cilj: 10000,          // do koliko se igra
     minUpis: 300,         // najmanje što se sme upisati u SVAKOM potezu (0 = bez donje granice)
     ulaz: 0,              // koliko mora u jednom potezu da bi se „ušlo" prvi put (0 = bez ulaza)
-    visestruke: 'dupliranje', // 'dupliranje' (svaka sledeća ×2: 4 keca 2000, 4 dvojke 400 — Andrijino pravilo) ili 'fiksno' (1000/2000/3000)
+    visestruke: 'zbir',   // 'zbir' (svaka sledeća kockica doda još jednu trojku: 4 četvorke 800, 5 šestica 1800 — Katarinino pravilo), 'dupliranje' (×2 po kockici) ili 'fiksno' (1000/2000/3000)
     kenta: 1500,          // 1-2-3-4-5-6
     triPara: 750,         // 0 = ne važi (Andrijino pravilo: 750)
     cetiriIPar: 1500,     // samo uz 'fiksno'; 0 = ne važi
@@ -37,6 +37,7 @@
   function trojka(v) { return v === 1 ? 1000 : v * 100; }
 
   function nIstih(v, n, r) {
+    if (r.visestruke === 'zbir') return trojka(v) * (n - 2);
     if (r.visestruke === 'dupliranje') return trojka(v) * Math.pow(2, n - 3);
     return n === 3 ? trojka(v) : (n - 3) * 1000;
   }

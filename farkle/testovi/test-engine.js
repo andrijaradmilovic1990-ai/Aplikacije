@@ -6,7 +6,9 @@ function jed(a, b, opis) { ok(a === b, opis + ' (dobijeno ' + a + ', očekivano 
 
 const PODR = F.pravila();
 const FIX = F.pravila({ visestruke: 'fiksno' });
-jed(PODR.visestruke, 'dupliranje', 'podrazumevano: četiri iste dupliraju');
+jed(PODR.visestruke, 'zbir', 'podrazumevano: svaka sledeća kockica doda trojku');
+jed(F.bodujIzbor([4, 4, 4, 4], PODR), 800, 'četiri četvorke = 800'); jed(F.bodujIzbor([6, 6, 6, 6, 6], PODR), 1800, 'pet šestica = 1800');
+jed(F.bodujIzbor([5, 5, 5, 5, 5, 5], PODR), 2000, 'šest petica = 2000'); jed(F.bodujIzbor([1, 1, 1, 1, 1], PODR), 3000, 'pet keceva = 3000');
 jed(F.bodujIzbor([1, 1, 1, 1], PODR), 2000, 'četiri keca = 2000'); jed(F.bodujIzbor([2, 2, 2, 2], PODR), 400, 'četiri dvojke = 400');
 jed(F.bodujIzbor([1, 1, 1, 1, 6, 6], PODR), 0, 'četiri keca + dve šestice: šestice ne mogu (nisu tri para)');
 jed(F.bodujIzbor([1, 1, 1, 1, 5, 5], PODR), 2100, 'četiri keca + dve petice = 2100');
