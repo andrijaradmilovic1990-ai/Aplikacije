@@ -29,6 +29,7 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   await p.click('#segBrzina [data-v=brza]');
   await p.click('[data-pravilo=cilj] [data-v="3000"]');
   await p.click('[data-pravilo=ulaz] [data-v="0"]');
+  ok(await p.evaluate(() => document.querySelector('[data-pravilo=minUpis] .izabran').dataset.v) === '300', 'podrazumevano: upis od 300');
   await slika('2-podesavanja');
   await p.click('#podesNazad');
   await p.waitForTimeout(400);
@@ -62,6 +63,7 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
       for (const i of o.indeksi) await p.click('#polje .kocka >> nth=' + i, { force: true });
       const izabrano = await p.$$eval('#polje .kocka.izabrana', e => e.length);
       ok(izabrano === o.indeksi.length, 'dodir izabrao ' + izabrano + ' od ' + o.indeksi.length + ' kockica');
+      if (izabrano !== o.indeksi.length) console.log('  DIJAG', JSON.stringify(o), await p.evaluate(() => JSON.stringify({ g: window.__farkle.stanje().potez, n: document.querySelectorAll('#polje .kocka').length, izabrane: [...document.querySelectorAll('#polje .kocka')].map((k, i) => k.classList.contains('izabrana') ? i : -1).filter(i => i >= 0), boxes: [...document.querySelectorAll('#polje .kocka')].map(k => { const r = k.getBoundingClientRect(); return [Math.round(r.x), Math.round(r.y), Math.round(r.width)]; }) })));
       if (!snimljenoBira) { await p.waitForTimeout(300); await slika('5-izbor'); snimljenoBira = true; }
       const dug = o.akcija === 'upisi' && await p.isEnabled('#dugmeUpisi') ? '#dugmeUpisi' : '#dugmeBaci';
       await p.click(dug); await p.waitForTimeout(dug === '#dugmeBaci' ? 1500 : 600); koraka++;
@@ -90,6 +92,16 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   const posle = await p.evaluate(() => JSON.stringify(window.__farkle.stanje().potez));
   ok(pre === posle, 'partija nastavljena tačno gde je stala');
 
+  // upis od 300: sa 150 u potezu „Upiši" je zaključano i piše zašto
+  await p.evaluate(() => { const g = window.__farkle.stanje(); g.pravila.minUpis = 300; g.potez = { faza: 'bira', bacanje: [5, 2, 3, 4, 6, 2], sacuvano: [[1]], poeni: 100, slobodnih: 6, vruce: false }; window.__farkle.postavi(g); });
+  await p.click('#polje .kocka >> nth=0', { force: true }); await p.waitForTimeout(200);
+  ok(!(await p.isEnabled('#dugmeUpisi')), '150 u potezu: Upiši zaključano');
+  ok(/300/.test(await p.textContent('#savet')), 'savet kaže da treba 300');
+  ok(await p.isEnabled('#dugmeBaci'), 'bacanje dalje dozvoljeno');
+  await p.evaluate(() => { const g = window.__farkle.stanje(); g.potez = { faza: 'bira', bacanje: [1, 1, 3, 4, 6, 2], sacuvano: [[1]], poeni: 100, slobodnih: 6, vruce: false }; window.__farkle.postavi(g); });
+  await p.click('#polje .kocka >> nth=0', { force: true }); await p.click('#polje .kocka >> nth=1', { force: true }); await p.waitForTimeout(200);
+  ok(await p.isEnabled('#dugmeUpisi'), '300 u potezu: Upiši otključano');
+
   // kockice pokazuju pravu stranu: poznato bacanje 1..6
   await p.evaluate(() => { const g = window.__farkle.stanje(); g.potez = { faza: 'bira', bacanje: [1, 2, 3, 4, 5, 6], sacuvano: [[5], [1, 1, 1]], poeni: 1050, slobodnih: 6, vruce: false }; window.__farkle.postavi(g); });
   await p.waitForTimeout(500);
@@ -97,6 +109,12 @@ const ok = (u, o) => { if (u) prosli++; else { pali++; console.log('PALO: ' + o)
   await p.evaluate(() => document.documentElement.setAttribute('data-tema', 'svetla'));
   await p.waitForTimeout(300);
   await slika('9-svetla');
+
+  // stara podešavanja (ulaz 500) prelaze na novo pravilo
+  await p.evaluate(() => { localStorage.setItem('farkle_podesavanja_v1', JSON.stringify({ pravila: { ulaz: 500, cilj: 10000 } })); });
+  await p.reload(); await p.waitForTimeout(700);
+  const pr = await p.evaluate(() => JSON.parse(localStorage.getItem('farkle_podesavanja_v1')).pravila);
+  ok(pr.ulaz === 0 && pr.minUpis === 300, 'stara podešavanja prevedena: ulaz ' + pr.ulaz + ', upis od ' + pr.minUpis);
 
   ok(greske.length === 0, 'bez grešaka u konzoli: ' + greske.join(' | '));
   await b.close();

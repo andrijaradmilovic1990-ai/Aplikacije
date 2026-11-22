@@ -323,7 +323,8 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
     <div class="kartica">
       <h3>Pravila za nove partije</h3>
       <div class="polje-forme"><label>Igra se do</label><div class="segment" data-pravilo="cilj"><button data-v="3000">3.000</button><button data-v="5000">5.000</button><button data-v="10000">10.000</button></div></div>
-      <div class="polje-forme"><label>Ulaz u igru (u jednom potezu)</label><div class="segment" data-pravilo="ulaz"><button data-v="0">bez</button><button data-v="350">350</button><button data-v="500">500</button><button data-v="1000">1.000</button></div></div>
+      <div class="polje-forme"><label>Najmanje za upis (svaki potez)</label><div class="segment" data-pravilo="minUpis"><button data-v="0">bez</button><button data-v="300">300</button><button data-v="350">350</button><button data-v="500">500</button></div></div>
+      <div class="polje-forme"><label>Ulaz u igru (samo prvi upis)</label><div class="segment" data-pravilo="ulaz"><button data-v="0">bez</button><button data-v="500">500</button><button data-v="1000">1.000</button></div></div>
       <div class="polje-forme"><label>Četiri, pet i šest istih</label><div class="segment" data-pravilo="visestruke"><button data-v="fiksno">1000 · 2000 · 3000</button><button data-v="dupliranje">dupliranje</button></div></div>
       <div class="polje-forme"><label>Tri para</label><div class="segment" data-pravilo="triPara"><button data-v="1500">1.500</button><button data-v="750">750</button><button data-v="0">ne važi</button></div></div>
       <div class="prekidac" data-prekidac="malaKenta"><div class="opis">Mala kenta<small>1-2-3-4-5 = 500 · 2-3-4-5-6 = 750</small></div><div class="sviter"></div></div>
@@ -379,7 +380,11 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const POD0 = { ime:'', tema:'auto', brzina:'normalna', zvuk:true, vibracija:true, pomoc:true, posveta:'', nivo:'srednji', prvi:'slucajno',
   mod:'bot', imena:['Igrač 1','Igrač 2'], pravila:{} };
 let pod = Object.assign({}, POD0, ucitaj(KLJ.pod, {}));
+// pravila v2 (22.11.2026): upis od 300 u svakom potezu umesto ulaza od 500
+const staraPravila = (pod.pravilaV || 1) < 2;
+if(staraPravila){ delete pod.pravila.ulaz; delete pod.pravila.minUpis; pod.pravilaV = 2; }
 pod.pravila = F.pravila(pod.pravila);
+if(staraPravila){ try{ localStorage.setItem(KLJ.pod, JSON.stringify(pod)); }catch(e){} }
 let stat = Object.assign({ lak:{p:0,i:0}, srednji:{p:0,i:0}, tezak:{p:0,i:0}, najPotez:0, partija:0 }, ucitaj(KLJ.stat, {}));
 function sacuvajPod(){ sacuvaj(KLJ.pod, pod); }
 
@@ -550,7 +555,8 @@ function segment(el, vrednost, naIzbor){
 function sazetakPravila(r){
   const d = [];
   d.push('do ' + broj(r.cilj));
-  d.push(r.ulaz ? 'ulaz ' + broj(r.ulaz) : 'bez ulaza');
+  d.push(r.minUpis ? 'upis od ' + broj(r.minUpis) : 'upis bez minimuma');
+  if(r.ulaz > (r.minUpis || 0)) d.push('ulaz ' + broj(r.ulaz));
   d.push(r.visestruke === 'fiksno' ? '4/5/6 istih: 1000/2000/3000' : '4/5/6 istih: dupliranje');
   d.push(r.triPara ? 'tri para ' + broj(r.triPara) : 'tri para ne važe');
   if(r.malaKenta) d.push('mala kenta');
@@ -639,7 +645,7 @@ function crtajRezultate(skacuci){
   const r = $('rezultati');
   r.innerHTML = G.igraci.map((x, i) => {
     const procenat = Math.min(100, x.poeni / G.pravila.cilj * 100);
-    const napom = (!x.naTabli && G.pravila.ulaz) ? 'još nije na tabli' : (x.tip === 'bot' ? NIVO_IME[x.nivo] : '');
+    const napom = (!x.naTabli && G.pravila.ulaz > (G.pravila.minUpis || 0)) ? 'još nije na tabli' : (x.tip === 'bot' ? NIVO_IME[x.nivo] : '');
     return '<div class="igrac-kartica' + (i === G.naPotezu && !G.kraj ? ' na-potezu' : '') + (i === skacuci ? ' skok' : '') + '">' +
       '<div class="ime">' + (x.tip === 'bot' ? '🤖 ' : '') + esc(x.ime) + '</div>' +
       '<div class="poeni">' + broj(x.poeni) + '</div>' +
@@ -944,7 +950,9 @@ function osveziPravila(){
   if(r.visestruke === 'fiksno' && r.dveTrojke) h += red([2, 2, 2, 5, 5, 5], 'Dve trojke', broj(r.dveTrojke));
   if(r.malaKenta){ h += red([1, 2, 3, 4, 5], 'Mala kenta', 500); h += red([2, 3, 4, 5, 6], 'Mala kenta', 750); }
   $('tabelaBodova').innerHTML = h;
-  $('uputstvoUlaz').innerHTML = r.ulaz ? 'Za ulazak u igru treba u jednom potezu skupiti bar <b>' + broj(r.ulaz) + '</b>. Posle toga upisuješ koliko god hoćeš.' : 'Nema ulaza: upisuješ od prvog poteza.';
+  const min = r.minUpis || 0;
+  $('uputstvoUlaz').innerHTML = (min ? 'Upisuje se tek kad u potezu imaš bar <b>' + broj(min) + '</b>. Dok ne skupiš toliko, moraš da bacaš dalje.' : 'Upisuješ koliko god hoćeš, bez minimuma.') +
+    (r.ulaz > min ? ' Za prvi upis (ulazak u igru) treba bar <b>' + broj(r.ulaz) + '</b>.' : '');
   $('uputstvoKraj').innerHTML = 'Igra se do <b>' + broj(r.cilj) + '</b>.' + (r.poslednjiKrug ? ' Kad neko pređe cilj, svi ostali imaju još po jedan potez da ga prestignu.' : ' Ko prvi pređe cilj, pobeđuje.') +
     (r.kaznaTriFarkla ? ' Tri farkla zaredom koštaju <b>' + broj(r.kaznaTriFarkla) + '</b>.' : '');
 }

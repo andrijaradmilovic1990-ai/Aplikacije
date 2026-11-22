@@ -5,6 +5,7 @@ function ok(uslov, opis) { if (uslov) prosli++; else { pali++; console.log('PALO
 function jed(a, b, opis) { ok(a === b, opis + ' (dobijeno ' + a + ', očekivano ' + b + ')'); }
 
 const FIX = F.pravila();
+jed(FIX.minUpis, 300, 'podrazumevano: upis od 300 svaki potez'); jed(FIX.ulaz, 0, 'podrazumevano: bez posebnog ulaza');
 const DUP = F.pravila({ visestruke: 'dupliranje' });
 const B = (k, r) => F.bodujIzbor(k, r || FIX);
 
@@ -64,7 +65,7 @@ ok(br.slice(1).every(x => x > 9500 && x < 10500), 'kriptokocka ravnomerna: ' + b
 
 // --- tok partije sa nameštenim kockicama
 function niz(...v) { let i = 0; return () => { if (i >= v.length) throw new Error('nestalo kockica'); return v[i++]; }; }
-let g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }], {});
+let g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }], { ulaz: 500, minUpis: 0 });
 g = F.baci(g, niz(1, 1, 1, 2, 3, 4));
 jed(g.potez.faza, 'bira', 'posle bacanja bira');
 ok(!F.mozeUpis(g, [3]).ok, 'izbor dvojke nije dozvoljen');
@@ -86,18 +87,34 @@ g = F.baci(g, niz(1, 2, 3, 4, 5, 6)); g = F.baci(g, niz(5, 2, 2, 3, 4, 6), [0, 1
 jed(g.potez.slobodnih, 6, 'vruće: opet 6'); ok(g.potez.vruce, 'zastavica vruće');
 g = F.upisi(g, [0]); jed(g.igraci[0].poeni, 2550, 'A 1000+1500+50');
 
+// --- upis od 300 u svakom potezu
+g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }]);
+g = F.baci(g, niz(1, 1, 1, 2, 3, 4)); g = F.upisi(g, [0, 1, 2]); jed(g.igraci[0].poeni, 1000, 'A upisao 1000');
+g = F.baci(g, niz(5, 2, 2, 3, 4, 6));
+let m = F.mozeUpis(g, [0]); ok(!m.ok && /300/.test(m.razlog), 'B sa 50 ne može da upiše: ' + m.razlog);
+greska = ''; try { F.upisi(g, [0]); } catch (e) { greska = e.message; } ok(/300/.test(greska), 'upis ispod 300 odbijen');
+g = F.baci(g, niz(5, 5, 2, 3, 4), [0]);
+m = F.mozeUpis(g, [0, 1]); ok(!m.ok, '150 i dalje ispod 300');
+g = F.baci(g, niz(1, 1, 3), [0, 1]);
+m = F.mozeUpis(g, [0, 1]); ok(m.ok && m.ukupno === 350, 'sa 350 upis dozvoljen');
+g = F.upisi(g, [0, 1]); jed(g.igraci[1].poeni, 350, 'B upisao 350');
+g = F.baci(g, niz(1, 5, 5, 2, 3, 4)); m = F.mozeUpis(g, [0, 1, 2]); ok(!m.ok, 'i kad je već na tabli: 200 ne može');
+g = F.baci(g, niz(1, 2, 3), [0, 1, 2]); m = F.mozeUpis(g, [0]); ok(m.ok && m.ukupno === 300, 'tačno 300 može');
+const stara = F.novaPartija([{ ime: 'A' }, { ime: 'B' }]); delete stara.pravila.minUpis;
+const s2 = F.baci(stara, niz(5, 2, 2, 3, 4, 6)); ok(F.mozeUpis(s2, [0]).ok, 'stara sačuvana partija (bez minUpis) radi kao pre');
+
 // --- poslednji krug
-g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }, { ime: 'C' }], { cilj: 1000, ulaz: 0 });
+g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }, { ime: 'C' }], { cilj: 1000, ulaz: 0, minUpis: 0 });
 g = F.baci(g, niz(1, 1, 1, 2, 3, 4)); g = F.upisi(g, [0, 1, 2]);
 jed(g.okidac, 0, 'A okinuo kraj'); ok(!g.kraj, 'još nije kraj');
 g = F.baci(g, niz(5, 2, 3, 4, 6, 2)); g = F.upisi(g, [0]); ok(!g.kraj, 'B odigrao poslednji');
 g = F.baci(g, niz(1, 1, 1, 1, 2, 3)); g = F.upisi(g, [0, 1, 2, 3]);
 ok(g.kraj && g.kraj.pobednik === 2, 'C prestigao u poslednjem krugu i pobedio');
-g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }], { cilj: 1000, ulaz: 0, poslednjiKrug: false });
+g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }], { cilj: 1000, ulaz: 0, minUpis: 0, poslednjiKrug: false });
 g = F.baci(g, niz(1, 1, 1, 2, 3, 4)); g = F.upisi(g, [0, 1, 2]); ok(g.kraj && g.kraj.pobednik === 0, 'bez poslednjeg kruga: odmah pobeda');
 
 // --- kazna za tri farkla
-g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }], { ulaz: 0, kaznaTriFarkla: 1000 });
+g = F.novaPartija([{ ime: 'A' }, { ime: 'B' }], { ulaz: 0, minUpis: 0, kaznaTriFarkla: 1000 });
 g = F.baci(g, niz(1, 1, 1, 2, 3, 4)); g = F.upisi(g, [0, 1, 2]);
 for (let k = 0; k < 3; k++) {
   g = F.baci(g, niz(2, 3, 4, 6, 2, 3)); g = F.posleFarkla(g); // B
