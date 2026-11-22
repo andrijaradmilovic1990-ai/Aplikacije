@@ -51,7 +51,7 @@
     { id: 'p-zlatni', tip: 'prsten', ime: 'Zlatni prsten', cena: 200, metal: 'zlato' },
     { id: 'p-rubin', tip: 'prsten', ime: 'Prsten sa rubinom', cena: 380, metal: 'zlato', kamen: '#c3102c' },
     { id: 'p-dijamant', tip: 'prsten', pol: 'z', ime: 'Prsten sa dijamantom', cena: 520, metal: 'srebro', kamen: '#e9f6ff' },
-    { id: 'p-pecatnjak', tip: 'prsten', pol: 'm', ime: 'Pečatnjak', cena: 320, metal: 'zlato', pecat: true },
+    { id: 'p-pecatnjak', tip: 'prsten', pol: 'm', ime: 'Srebrni pečatnjak', cena: 320, metal: 'srebro', pecat: true },
     { id: 'p-crni', tip: 'prsten', pol: 'm', ime: 'Crni prsten', cena: 220, metal: 'crni' },
 
     { id: 'z-nema', tip: 'zglob', ime: 'Ništa', cena: 0 },
