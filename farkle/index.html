@@ -1388,7 +1388,7 @@ function otvoriVezu(){
 }
 function zatvoriSto(){
   if(!onl) return;
-  onl.ziv = false; clearTimeout(onl.tajmer); clearTimeout(onl.daljeTajmer);
+  onl.ziv = false; clearTimeout(onl.tajmer);
   try{ onl.ws && onl.ws.close(1000); }catch(e){}
   onl = null;
 }
@@ -1434,7 +1434,6 @@ async function obradiSto(m){
   }
   if(d.tip === 'baci'){
     await izvrsiBacanje(onlG(m), rukaIgraca(m, d.ko));
-    if(G.potez.faza === 'farkle') zakaziDalje();
   } else if(d.tip === 'upis'){
     await izvrsiUpis(null, { g:onlG(m), ukupno:d.ukupno });
   } else if(d.tip === 'dalje'){
@@ -1445,16 +1444,6 @@ async function obradiSto(m){
     else crtajRezultate();
   }
 }
-// posle farkla: ako se igrač na potezu ne javi (telefon mu zaspao), drugi telefon posle 5 s pošalje „dalje"
-function zakaziDalje(){
-  if(!onl) return;
-  clearTimeout(onl.daljeTajmer);
-  const br = G.br, dn = G.dnevnik.length;
-  onl.daljeTajmer = setTimeout(() => {
-    if(jeOnline() && G.br === br && G.dnevnik.length === dn && G.potez.faza === 'farkle' && !mojPotez()) posaljiStolu({ t:'dalje' });
-  }, 5000);
-}
-
 function osveziOnline(){
   const s = onl && onl.s && !onl.s.g ? onl.s : null;
   const cekam = onl && !onl.s;

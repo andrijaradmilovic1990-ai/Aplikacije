@@ -95,11 +95,15 @@ const cekaj = ms => new Promise(r => setTimeout(r, ms));
     if (t.faza === 'farkle') {
       farkli++;
       if (!autoDalje && ja === K) {
-        // Katarina ne pritisne „Dalje": Andrijin telefon posle 5 s sam pomeri partiju
+        // Katarina ne pritisne „Dalje": sto sam pomeri partiju posle 6 s
         const pre = sa.g.dnevnik.length;
-        await cekaj(6500);
+        await cekaj(7500);
         autoDalje = (await stanje(A)).g.dnevnik.length === pre + 1;
-        ok(autoDalje, 'posle farkla koji se ne potvrdi, drugi telefon sam nastavi posle 5 s');
+        ok(autoDalje, 'posle farkla koji se ne potvrdi, sto sam nastavi posle 6 s');
+        if (!autoDalje) {
+          console.log('  DIJAG A', await A.evaluate(() => { const o = window.__farkle.onl(), g = window.__farkle.stanje(); return JSON.stringify({ ekran: window.__farkle.ekran(), ws: o && o.ws && o.ws.readyState, faza: g.potez.faza, ja: o && o.ja, naPotezu: g.igraci[g.naPotezu].ko, br: g.br, dn: g.dnevnik.length, zauzet: window.__farkle.zauzet(), tost: document.querySelector('#tost').textContent }); }));
+          await K.click('#dugmeBaci'); autoDalje = true; // da test ne zaglavi
+        }
         continue;
       }
       await ja.click('#dugmeBaci'); await cekaj(300); continue;
