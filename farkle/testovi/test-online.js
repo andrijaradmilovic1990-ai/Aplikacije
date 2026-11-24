@@ -154,6 +154,25 @@ const cekaj = ms => new Promise(r => setTimeout(r, ms));
   await A.click('#dugmeNazadSto');
   await A.waitForFunction(() => window.__farkle.ekran() === 'igra', null, { timeout: 8000 }).then(() => ok(true, 'nazad za sto: ista partija'), () => ok(false, 'nazad za sto: ista partija'));
 
+  // prekid partije (24.11.: „ne može da se prekine partija"): Andrija sa početne napusti sto usred partije
+  await A.click('#igraNazad'); await A.waitForTimeout(500);
+  await A.click('#napustiStoDugme'); await A.waitForTimeout(300);
+  ok(await A.isVisible('#prozorPotvrda'), 'napusti sto: traži potvrdu');
+  await A.click('#potvrdaDa'); await A.waitForTimeout(600);
+  ok(!(await A.isVisible('#dugmeNazadSto')) && await A.evaluate(() => !localStorage.getItem('farkle_online_v1')), 'posle izlaska nema više „Nazad za sto"');
+  await K.waitForSelector('#prozorKraj.vidljiv', { timeout: 8000 }).catch(() => {});
+  ok(await K.isVisible('#prozorKraj') && (await K.textContent('#krajPobednik')) === 'Pobeda!' && (await K.textContent('#krajTekst')).includes('Andrija više nije za stolom'), 'Katarini: partija prekinuta, pobeda');
+  ok(!(await K.isVisible('#krajRevans')), 'Katarini: nema revanša (nema s kim)');
+  await K.click('#krajPocetna'); await K.waitForTimeout(500);
+  ok(!(await K.isVisible('#dugmeNazadSto')), 'Katarini posle „Početna": nema „Nazad za sto"');
+  // lokalna sačuvana partija: ✕ je briše
+  await A.evaluate(() => localStorage.setItem('farkle_partija_v1', JSON.stringify({ v:1, kraj:null, mod:'bot', igraci:[] })));
+  await A.reload(); await A.waitForTimeout(800);
+  if(await A.isVisible('#prozorRuka')) await A.evaluate(() => document.getElementById('prozorRuka').classList.remove('vidljiv'));
+  ok(await A.isVisible('#dugmeNastavi'), 'lokalna partija: „Nastavi partiju" + ✕');
+  await A.click('#prekiniPartiju'); await A.click('#potvrdaDa'); await A.waitForTimeout(300);
+  ok(!(await A.isVisible('#dugmeNastavi')) && await A.evaluate(() => !localStorage.getItem('farkle_partija_v1')), '✕ briše sačuvanu partiju');
+
   ok(greske.length === 0, 'bez JS grešaka' + (greske.length ? ': ' + greske.slice(0, 3).join(' | ') : ''));
   await b.close();
   console.log(pali ? `PALO ${pali} — prošlo ${prosli}` : `SVE PROŠLO — prošlo ${prosli}`);
