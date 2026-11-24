@@ -106,6 +106,13 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 .sazetak{font-size:13.5px;color:var(--tekst2);line-height:1.5}
 .link{color:var(--zlato);font-weight:600;font-size:14px;padding:.5rem 0 0}
 .podnozje{padding:.8rem 1rem 1rem}
+.kod-unos{flex:1;font-size:24px;letter-spacing:.35em;text-transform:uppercase;text-align:center;min-height:56px;font-weight:700}
+.kod-veliki{font-size:52px;letter-spacing:.28em;font-weight:800;color:var(--zlato);margin:.2rem 0 .1rem .28em}
+.onl-igrac{display:flex;align-items:center;gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--ivica);font-size:16px}
+.onl-igrac:last-child{border-bottom:none}
+.onl-igrac .tacka{width:10px;height:10px;border-radius:50%;background:#5bbf6a;flex:none}
+.onl-igrac .tacka.ne{background:var(--tekst3)}
+.onl-igrac small{color:var(--tekst3);margin-left:auto;font-size:13px}
 
 /* ---------- bodovanje (tabela) ---------- */
 .bodovi-tabela{width:100%;border-collapse:collapse}
@@ -286,7 +293,9 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
     <div class="meni">
       <button class="dugme glavno" id="dugmeNastavi" style="display:none">Nastavi partiju</button>
       <button class="dugme" id="dugmeKompjuter">🎲 Protiv kompjutera</button>
+      <button class="dugme glavno" id="dugmeNazadSto" style="display:none"></button>
       <button class="dugme" id="dugmeLokalno">👥 Na istom telefonu</button>
+      <button class="dugme" id="dugmeOnline">🌐 Preko interneta</button>
       <button class="dugme" id="dugmeProdavnica"><span id="prodIkona">💅</span> Prodavnica <span class="zetoni" id="pocZetoni"></span></button>
       <button class="dugme instaliraj" id="dugmeInstaliraj">📲 Instaliraj na telefon</button>
       <div class="mala-dugmad">
@@ -334,6 +343,36 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
     </div>
   </div>
   <div class="podnozje"><button class="dugme glavno" id="dugmePocni" style="width:100%">Počni</button></div>
+</section>
+
+<!-- PREKO INTERNETA -->
+<section class="ekran" id="online">
+  <div class="zaglavlje"><button class="nazad" id="onlineNazad">‹</button><h2>Preko interneta</h2></div>
+  <div class="skrol">
+    <div id="onlUlaz">
+      <div class="kartica"><div class="polje-forme"><label for="onlIme">Tvoje ime</label><input id="onlIme" maxlength="16" autocomplete="off"></div></div>
+      <div class="kartica">
+        <h3>Novi sto</h3>
+        <div class="sazetak">Napravi sto i pošalji kod onome ko igra sa tobom. Igra se po tvojim pravilima:</div>
+        <div class="sazetak" id="onlPravila" style="margin-top:.35rem"></div>
+        <button class="dugme glavno" id="onlNapravi" style="width:100%;margin-top:.8rem">Napravi sto</button>
+      </div>
+      <div class="kartica">
+        <h3>Imam kod</h3>
+        <div class="red-dugmadi"><input id="onlKod" class="kod-unos" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD"><button class="dugme" id="onlUdji" style="flex:none;padding:0 1.4rem">Uđi</button></div>
+      </div>
+    </div>
+    <div id="onlSto" style="display:none">
+      <div class="kartica" style="text-align:center">
+        <h3>Kod stola</h3>
+        <div class="kod-veliki" id="onlKodVeliki"></div>
+        <button class="dugme" id="onlPodeli" style="width:100%;margin-top:.5rem">📨 Pošalji kod</button>
+      </div>
+      <div class="kartica"><h3>Za stolom</h3><div id="onlIgraci"></div></div>
+      <div class="sazetak" id="onlStatus" style="text-align:center;padding:0 .5rem"></div>
+    </div>
+  </div>
+  <div class="podnozje" id="onlPodnozje" style="display:none"><button class="dugme glavno" id="onlPocni" style="width:100%">Počni partiju</button></div>
 </section>
 
 <!-- IGRA -->
@@ -667,6 +706,7 @@ function prikazi(id, bezIstorije){
   if(id === 'pravila') osveziPravila();
   if(id === 'podesavanja') osveziPodesavanja();
   if(id === 'prodavnica') osveziProdavnicu();
+  if(id === 'online') osveziOnline();
   if(bio === 'igra' && id !== 'igra') zaustaviBota();
   if(!bezIstorije){ try{ history.pushState({ e:id }, ''); }catch(e){} }
 }
@@ -706,6 +746,9 @@ function potvrdi(naslov, tekst, da){
 function sacuvanaPartija(){ const g = ucitaj(KLJ.partija, null); return g && !g.kraj && g.v === 1 ? g : null; }
 function osveziPocetnu(){
   $('dugmeNastavi').style.display = sacuvanaPartija() ? 'flex' : 'none';
+  const so = sacuvaniSto();
+  $('dugmeNazadSto').style.display = so ? 'flex' : 'none';
+  if(so) $('dugmeNazadSto').textContent = '🌐 Nazad za sto ' + so.kod;
   $('posvetaTekst').textContent = pod.posveta || '';
   const s = ['lak','srednji','tezak'].map(n => stat[n]).reduce((a, b) => ({ p:a.p + b.p, i:a.i + b.i }), { p:0, i:0 });
   $('statistika').textContent = (s.p + s.i) ? ('Protiv kompjutera: ' + s.p + ' pobeda · ' + s.i + ' poraza') : '';
@@ -815,9 +858,12 @@ let kockeEl = [];           // DOM kockica za trenutno bacanje
 let botTok = 0;
 const ja = () => G.igraci[G.naPotezu];
 const jeBot = () => G && !G.kraj && ja().tip === 'bot';
+const jeOnline = () => !!(G && G.mod === 'online');
+const mojPotez = () => !jeOnline() || !!(onl && ja().ko === onl.ja);
+const nijeMoj = () => jeBot() || (jeOnline() && !G.kraj && !mojPotez());
 const brzina = () => ({ spora:1.5, normalna:1, brza:0.5 }[pod.brzina] || 1);
 
-function sacuvajPartiju(){ if(G) sacuvaj(KLJ.partija, G); }
+function sacuvajPartiju(){ if(G && G.mod !== 'online') sacuvaj(KLJ.partija, G); }
 
 function udjiUIgru(g, nova){
   G = g; izbor = new Set(); zauzet = false;
@@ -825,7 +871,7 @@ function udjiUIgru(g, nova){
   history.replaceState({ e:'pocetna' }, '');
   prikazi('igra');
   crtajSve(false);
-  if(nova) tost('Prvi baca: ' + ja().ime, 1800);
+  if(nova) tost(jeOnline() ? (mojPotez() ? 'Ti počinješ' : 'Prvi baca: ' + ja().ime) : 'Prvi baca: ' + ja().ime, 1800);
   if(jeBot()) pokreniBota();
 }
 
@@ -833,7 +879,8 @@ function crtajRezultate(skacuci){
   const r = $('rezultati');
   r.innerHTML = G.igraci.map((x, i) => {
     const procenat = Math.min(100, x.poeni / G.pravila.cilj * 100);
-    const napom = (!x.naTabli && G.pravila.ulaz > (G.pravila.minUpis || 0)) ? 'još nije na tabli' : (x.tip === 'bot' ? NIVO_IME[x.nivo] : '');
+    const onlIgr = jeOnline() && onl && onl.s && onl.s.igraci[x.ko];
+    const napom = (onlIgr && !onlIgr.povezan) ? '⚠ nije povezan' : (!x.naTabli && G.pravila.ulaz > (G.pravila.minUpis || 0)) ? 'još nije na tabli' : (x.tip === 'bot' ? NIVO_IME[x.nivo] : (jeOnline() && onl && x.ko === onl.ja ? 'ti' : ''));
     return '<div class="igrac-kartica' + (i === G.naPotezu && !G.kraj ? ' na-potezu' : '') + (i === skacuci ? ' skok' : '') + '">' +
       '<div class="ime">' + (x.tip === 'bot' ? '🤖 ' : '') + esc(x.ime) + '</div>' +
       '<div class="poeni">' + broj(x.poeni) + '</div>' +
@@ -849,9 +896,9 @@ function crtajSacuvano(){
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function bacanjeRukom(){
+async function bacanjeRukom(tudja){
   const sc = $('rukaScena');
-  const op = rukaOpcije();
+  const op = tudja || rukaOpcije();
   sc.innerHTML = rukaHTML(op, true);
   sc.classList.toggle('foto', !!FOTO[op.pol]);
   const svg = sc.firstElementChild;
@@ -869,8 +916,8 @@ function crtajPolje(animiraj, izRuke){
   p.innerHTML = ''; kockeEl = [];
   if(t.faza === 'baci' || !t.bacanje.length){
     const n = t.slobodnih;
-    const tekst = jeBot() ? '<b>' + esc(ja().ime) + '</b>razmišlja…' :
-      ('<b>' + (G.igraci.filter(x => x.tip === 'covek').length > 1 || G.mod === 'lokalno' ? esc(ja().ime) + ', ' : '') + 'tvoj potez</b>' +
+    const tekst = jeBot() ? '<b>' + esc(ja().ime) + '</b>razmišlja…' : nijeMoj() ? '<b>' + esc(ja().ime) + '</b>je na potezu' :
+      ('<b>' + (G.mod === 'lokalno' || (G.mod !== 'online' && G.igraci.filter(x => x.tip === 'covek').length > 1) ? esc(ja().ime) + ', ' : '') + 'tvoj potez</b>' +
        (t.vruce ? 'Vruće kockice! Baci svih šest ponovo.' : 'Baci ' + (n === 6 ? 'šest kockica' : n + ' ' + (n === 1 ? 'kockicu' : n < 5 ? 'kockice' : 'kockica'))));
     p.innerHTML = '<div class="prazno-polje">' + tekst + '</div>';
     return;
@@ -919,17 +966,18 @@ function crtajInfo(){
   const bac = $('dugmeBaci'), up = $('dugmeUpisi');
   bac.disabled = false; up.disabled = true;
   if(G.kraj){ bac.disabled = true; lbl.textContent = '—'; up.innerHTML = 'Upiši'; bac.innerHTML = 'Kraj'; return; }
-  const botNaPotezu = jeBot();
+  const botNaPotezu = nijeMoj();
+  const igraTekst = jeOnline() ? esc(ja().ime) + ' igra…' : 'Kompjuter igra…';
   if(t.faza === 'farkle'){
     lbl.textContent = '—';
-    bac.innerHTML = botNaPotezu ? 'Kompjuter…' : 'Dalje';
+    bac.innerHTML = botNaPotezu ? (jeOnline() ? esc(ja().ime) + '…' : 'Kompjuter…') : 'Dalje';
     bac.disabled = botNaPotezu;
     up.innerHTML = 'Upiši';
     return;
   }
   if(t.faza === 'baci'){
     lbl.textContent = '—';
-    bac.innerHTML = botNaPotezu ? 'Kompjuter igra…' : 'Baci kockice';
+    bac.innerHTML = botNaPotezu ? igraTekst : 'Baci kockice';
     bac.disabled = botNaPotezu;
     up.innerHTML = 'Upiši';
     return;
@@ -941,7 +989,7 @@ function crtajInfo(){
   else lbl.textContent = '+' + broj(pr.poeni);
   const vazi = pr && pr.ok;
   const ost = vazi ? (t.bacanje.length - iz.length) : t.bacanje.length;
-  if(botNaPotezu){ bac.innerHTML = 'Kompjuter igra…'; bac.disabled = true; up.innerHTML = 'Upiši'; return; }
+  if(botNaPotezu){ bac.innerHTML = igraTekst; bac.disabled = true; up.innerHTML = 'Upiši'; return; }
   bac.disabled = !vazi;
   bac.innerHTML = vazi ? (ost === 0 ? '<span class="dvored">Vruće!<small>baci svih 6</small></span>' : '<span class="dvored">Baci još ' + ost + '<small>' + broj(t.poeni + pr.poeni) + ' u potezu</small></span>') : 'Baci ostatak';
   const m = vazi ? F.mozeUpis(G, iz) : { ok:false };
@@ -963,14 +1011,15 @@ function crtajSve(animiraj){
 }
 
 function dodirKocke(i){
-  if(zauzet || jeBot() || !G || G.potez.faza !== 'bira') return;
+  if(zauzet || !G || nijeMoj() || G.potez.faza !== 'bira') return;
   if(izbor.has(i)) izbor.delete(i); else izbor.add(i);
   kockeEl[i].classList.toggle('izabrana', izbor.has(i));
+  if(jeOnline()) posaljiStolu({ t:'izbor', indeksi:[...izbor] });
   zvuk('klik'); vibriraj(8);
   crtajInfo();
 }
 
-async function izvrsiBacanje(novo){
+async function izvrsiBacanje(novo, tudjaRuka){
   zauzet = true;
   const bilo = G.potez.faza;
   G = novo; izbor = new Set();
@@ -980,7 +1029,7 @@ async function izvrsiBacanje(novo){
   if(G.potez.vruce && bilo === 'bira'){ zvuk('vruce'); vibriraj([20, 40, 20]); tost('🔥 Vruće kockice! Svih šest nazad.', 1800); }
   const rukom = pod.ruka !== false && !jeBot();
   $('dugmeBaci').disabled = true; $('dugmeUpisi').disabled = true;
-  if(rukom){ $('polje').innerHTML = ''; kockeEl = []; await bacanjeRukom(); }
+  if(rukom){ $('polje').innerHTML = ''; kockeEl = []; await bacanjeRukom(tudjaRuka); }
   crtajPolje(true, rukom); crtajInfo();
   $('dugmeBaci').disabled = true; $('dugmeUpisi').disabled = true;
   zvuk('bacanje'); vibriraj(25);
@@ -996,12 +1045,13 @@ async function izvrsiBacanje(novo){
   oznaci(); crtajInfo();
 }
 
-async function izvrsiUpis(indeksi){
+async function izvrsiUpis(indeksi, saStola){
   zauzet = true;
-  const ko = G.naPotezu, ukupno = F.mozeUpis(G, indeksi).ukupno;
-  G = F.upisi(G, indeksi); izbor = new Set();
+  const ko = G.naPotezu, ukupno = saStola ? saStola.ukupno : F.mozeUpis(G, indeksi).ukupno;
+  G = saStola ? saStola.g : F.upisi(G, indeksi); izbor = new Set();
   sacuvajPartiju();
-  if(ukupno > stat.najPotez && G.igraci[ko].tip === 'covek'){ stat.najPotez = ukupno; sacuvaj(KLJ.stat, stat); }
+  const moj = G.mod === 'online' ? (onl && G.igraci[ko].ko === onl.ja) : G.igraci[ko].tip === 'covek';
+  if(ukupno > stat.najPotez && moj){ stat.najPotez = ukupno; sacuvaj(KLJ.stat, stat); }
   zvuk('upis'); vibriraj(30);
   tost('+' + broj(ukupno) + ' · ' + G.igraci[ko].ime, 1500);
   crtajRezultate(ko);
@@ -1011,13 +1061,14 @@ async function izvrsiUpis(indeksi){
   crtajSve(false);
   if(G.okidac === ko) await najavi(G.igraci[ko].ime + ' preko ' + broj(G.pravila.cilj) + '! Poslednja šansa za ostale.');
   else if(G.mod === 'lokalno') tost('Na potezu: ' + ja().ime, 1600);
+  else if(G.mod === 'online') tost(mojPotez() ? 'Tvoj potez' : 'Na potezu: ' + ja().ime, 1400);
 }
 
 async function najavi(t){ tost(t, 2400); await cekaj(900); }
 
-async function nastaviPosleFarkla(){
+async function nastaviPosleFarkla(saStola){
   zauzet = true;
-  G = F.posleFarkla(G); izbor = new Set();
+  G = saStola || F.posleFarkla(G); izbor = new Set();
   sacuvajPartiju();
   const zadnji = G.dnevnik[G.dnevnik.length - 1];
   if(zadnji && zadnji.kazna) tost('Tri farkla zaredom: −' + broj(zadnji.kazna), 2200);
@@ -1025,11 +1076,18 @@ async function nastaviPosleFarkla(){
   if(G.kraj){ crtajSve(false); zavrsenaPartija(); return; }
   crtajSve(false);
   if(G.mod === 'lokalno' && !(zadnji && zadnji.kazna)) tost('Na potezu: ' + ja().ime, 1600);
+  if(G.mod === 'online' && !(zadnji && zadnji.kazna)) tost(mojPotez() ? 'Tvoj potez' : 'Na potezu: ' + ja().ime, 1400);
 }
 
 $('dugmeBaci').onclick = async () => {
-  if(zauzet || !G || jeBot()) return;
+  if(zauzet || !G || nijeMoj()) return;
   const t = G.potez;
+  if(jeOnline()){
+    if(t.faza === 'bira' && !F.proveriIzbor(G, [...izbor]).ok) return;
+    $('dugmeBaci').disabled = true; $('dugmeUpisi').disabled = true;
+    posaljiStolu(t.faza === 'farkle' ? { t:'dalje' } : { t:'baci', indeksi: t.faza === 'bira' ? [...izbor] : undefined });
+    return;
+  }
   if(t.faza === 'farkle'){ await nastaviPosleFarkla(); if(jeBot()) pokreniBota(); return; }
   try{
     const novo = F.baci(G, F.kriptoKocka, t.faza === 'bira' ? [...izbor] : undefined);
@@ -1037,9 +1095,10 @@ $('dugmeBaci').onclick = async () => {
   }catch(e){ tost(e.message); }
 };
 $('dugmeUpisi').onclick = async () => {
-  if(zauzet || !G || jeBot()) return;
+  if(zauzet || !G || nijeMoj()) return;
   const m = F.mozeUpis(G, [...izbor]);
   if(!m.ok){ if(m.razlog) tost(m.razlog); return; }
+  if(jeOnline()){ $('dugmeBaci').disabled = true; $('dugmeUpisi').disabled = true; posaljiStolu({ t:'upisi', indeksi:[...izbor] }); return; }
   await izvrsiUpis([...izbor]);
   if(jeBot()) pokreniBota();
 };
@@ -1082,16 +1141,25 @@ async function pokreniBota(){
 /* ---------- kraj partije ---------- */
 function zavrsenaPartija(){
   const pob = G.igraci[G.kraj.pobednik];
-  const covekPobedio = pob.tip === 'covek';
+  const online = G.mod === 'online';
+  const covekPobedio = online ? !!(onl && pob.ko === onl.ja) : pob.tip === 'covek';
   if(G.mod === 'bot' && !G.zabelezeno){
     const bot = G.igraci.find(x => x.tip === 'bot');
     const s = stat[bot.nivo] || (stat[bot.nivo] = { p:0, i:0 });
     if(covekPobedio) s.p++; else s.i++;
     G.zabelezeno = true; sacuvaj(KLJ.stat, stat);
   }
-  obrisi(KLJ.partija);
+  if(!online) obrisi(KLJ.partija);
   let zarada = 0;
-  if(!G.isplaceno){
+  const onlKljuc = online && onl ? onl.kod + ':' + G.br : null;
+  if(online){
+    if(onlKljuc && kasa.onlPlaceno !== onlKljuc){
+      zarada = covekPobedio ? R.NAGRADA.online.pobeda : R.NAGRADA.online.poraz;
+      const danas = new Date().toISOString().slice(0, 10);
+      if(kasa.dan !== danas){ zarada += R.NAGRADA.dnevni; kasa.dan = danas; }
+      kasa.zetoni += zarada; kasa.onlPlaceno = onlKljuc; sacuvajKasu();
+    }
+  } else if(!G.isplaceno){
     if(G.mod === 'bot'){ const bot = G.igraci.find(x => x.tip === 'bot'); zarada = R.nagrada(covekPobedio ? 'pobeda' : 'poraz', bot.nivo); }
     else zarada = R.nagrada('lokalno');
     const danas = new Date().toISOString().slice(0, 10);
@@ -1100,7 +1168,7 @@ function zavrsenaPartija(){
   }
   $('krajNagrada').textContent = zarada ? '+' + zarada + ' 🪙' : '';
   if(zarada) setTimeout(() => zvuk('novcic'), 1300);
-  $('krajPobednik').textContent = G.mod === 'bot' ? (covekPobedio ? 'Pobeda!' : 'Kompjuter je pobedio') : (pob.ime + ' pobeđuje!');
+  $('krajPobednik').textContent = G.mod === 'bot' ? (covekPobedio ? 'Pobeda!' : 'Kompjuter je pobedio') : online ? (covekPobedio ? 'Pobeda!' : pob.ime + ' pobeđuje!') : (pob.ime + ' pobeđuje!');
   const najPotez = Math.max.apply(null, G.igraci.map(x => x.najPotez));
   $('krajTekst').textContent = 'Partija je trajala ' + G.krug + ' ' + (G.krug % 10 === 1 && G.krug % 100 !== 11 ? 'krug' : (G.krug % 10 >= 2 && G.krug % 10 <= 4 && (G.krug % 100 < 12 || G.krug % 100 > 14)) ? 'kruga' : 'krugova') + '. Najveći potez: ' + broj(najPotez) + '.';
   const red = G.igraci.map((x, i) => ({ x, i })).sort((a, b) => b.x.poeni - a.x.poeni);
@@ -1111,9 +1179,10 @@ function zavrsenaPartija(){
     else { zvuk('farkle'); }
   }, 500);
 }
-$('krajPocetna').onclick = () => { $('prozorKraj').classList.remove('vidljiv'); G = null; prikazi('pocetna', true); try{ history.replaceState({ e:'pocetna' }, ''); }catch(e){} };
+$('krajPocetna').onclick = () => { $('prozorKraj').classList.remove('vidljiv'); if(G && G.mod === 'online') napustiSto(); G = null; prikazi('pocetna', true); try{ history.replaceState({ e:'pocetna' }, ''); }catch(e){} };
 $('krajRevans').onclick = () => {
   $('prozorKraj').classList.remove('vidljiv');
+  if(G && G.mod === 'online'){ posaljiStolu({ t:'revans' }); tost('Revanš…', 1200); return; }
   const p = Object.assign({}, (G && G.postavka) || poslednjaPostavka);
   if(!p.mod) { prikazi('pocetna', true); return; }
   // u revanšu počinje drugi
@@ -1270,9 +1339,181 @@ $('obrisiStat').onclick = () => potvrdi('Obriši statistiku?', 'Pobede, porazi i
 // izlazak iz partije usred igre: partija ostaje sačuvana
 document.addEventListener('visibilitychange', () => { if(document.hidden) sacuvajPartiju(); });
 
+/* ---------- preko interneta (od 24.11.2026) ----------
+   Sto drži worker (Durable Object): kockice baca on, telefon šalje samo nameru (baci / upiši / dalje). */
+const ONL_KLJ = 'farkle_online_v1';
+const mojId = (() => {
+  let x = ucitaj('farkle_id', null);
+  if(!x){ const b = new Uint8Array(12); crypto.getRandomValues(b); x = Array.from(b, v => v.toString(16).padStart(2, '0')).join(''); sacuvaj('farkle_id', x); }
+  return x;
+})();
+let onl = null; // { kod, napravi, ws, s (poslednje stanje stola), ja, red, pokusaj, ziv }
+function sacuvaniSto(){ const x = ucitaj(ONL_KLJ, null); return x && x.kod && Date.now() - (x.vreme || 0) < 12 * 3600 * 1000 ? x : null; }
+function noviKod(){ const a = 'ABCDEFGHJKLMNPRSTUVZ', b = new Uint8Array(4); crypto.getRandomValues(b); return Array.from(b, v => a[v % a.length]).join(''); }
+function stoAdresa(kod){ return (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host + '/Aplikacije/farkle/sto/' + kod; }
+function imeOnline(){ return ($('onlIme').value || pod.ime || '').trim() || 'Igrač'; }
+function posaljiStolu(o){
+  if(onl && onl.ws && onl.ws.readyState === 1){ onl.ws.send(JSON.stringify(o)); return true; }
+  tost('Nema veze sa stolom — povezujem…', 1800); if(onl) crtajInfoAko(); return false;
+}
+function crtajInfoAko(){ if(G && trenutniEkran === 'igra') crtajInfo(); }
+function sednizaSto(kod, napravi){
+  zatvoriSto();
+  onl = { kod, napravi, ws:null, s:null, ja:null, red:Promise.resolve(), pokusaj:0, ziv:true };
+  sacuvaj(ONL_KLJ, { kod, vreme:Date.now() });
+  otvoriVezu();
+  osveziOnline();
+}
+function otvoriVezu(){
+  if(!onl || !onl.ziv) return;
+  clearTimeout(onl.tajmer);
+  let ws;
+  try{ ws = new WebSocket(stoAdresa(onl.kod)); }catch(e){ onl.tajmer = setTimeout(otvoriVezu, 2000); return; }
+  onl.ws = ws;
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ t:'zdravo', id:mojId, kod:onl.kod, ime:imeOnline(), napravi:!!onl.napravi, pravila:onl.napravi ? pod.pravila : undefined, ruka:rukaOpcije() }));
+  };
+  ws.onmessage = ev => {
+    if(ev.data === 'pong') return;
+    let m; try{ m = JSON.parse(ev.data); }catch(e){ return; }
+    const ovaj = onl;
+    ovaj.red = ovaj.red.then(() => { if(onl === ovaj) return obradiSto(m); }).catch(e => console.error(e));
+  };
+  ws.onclose = ev => {
+    if(!onl || onl.ws !== ws || !onl.ziv || ev.code === 4000) return;
+    const d = Math.min(8000, 600 * Math.pow(2, onl.pokusaj++));
+    onl.tajmer = setTimeout(otvoriVezu, d);
+    if(onl.pokusaj === 2) tost('Veza sa stolom pukla — povezujem…', 2000);
+  };
+}
+function zatvoriSto(){
+  if(!onl) return;
+  onl.ziv = false; clearTimeout(onl.tajmer); clearTimeout(onl.daljeTajmer);
+  try{ onl.ws && onl.ws.close(1000); }catch(e){}
+  onl = null;
+}
+function napustiSto(){
+  if(onl && onl.ws && onl.ws.readyState === 1) try{ onl.ws.send(JSON.stringify({ t:'izlazi' })); }catch(e){}
+  zatvoriSto(); obrisi(ONL_KLJ);
+}
+setInterval(() => { if(onl && onl.ws && onl.ws.readyState === 1) try{ onl.ws.send('ping'); }catch(e){} }, 25000);
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && onl && onl.ziv && (!onl.ws || onl.ws.readyState > 1)){ onl.pokusaj = 0; otvoriVezu(); }
+});
+function onlG(m){ const g = m.g; g.br = m.br; return g; }
+function rukaIgraca(m, ko){ const r = m.igraci[ko] && m.igraci[ko].ruka; return r && r.pol ? { pol:r.pol, koza:r.koza || 'svetla', nosi:r.nosi || {} } : null; }
+
+async function obradiSto(m){
+  if(m.t === 'greska'){
+    if(m.kod === 'zauzet' && onl && onl.napravi && !onl.s){ onl.kod = noviKod(); sacuvaj(ONL_KLJ, { kod:onl.kod, vreme:Date.now() }); try{ onl.ws.close(4000); }catch(e){} otvoriVezu(); return; }
+    if(m.kod === 'nema' || m.kod === 'pocelo' || m.kod === 'pun'){ tost(m.poruka, 2600); zatvoriSto(); obrisi(ONL_KLJ); osveziOnline(); osveziPocetnu(); return; }
+    tost(m.poruka, 2000); crtajInfoAko(); return;
+  }
+  if(m.t === 'izbor'){
+    if(jeOnline() && !mojPotez() && trenutniEkran === 'igra' && G.potez.faza === 'bira'){ izbor = new Set(m.indeksi); oznaci(); crtajInfo(); zvuk('klik'); }
+    return;
+  }
+  if(m.t !== 'sto') return;
+  onl.s = m; onl.ja = m.ja; onl.napravi = false; onl.pokusaj = 0;
+  sacuvaj(ONL_KLJ, { kod:onl.kod, vreme:Date.now() });
+  const d = m.dogadjaj || {};
+  if(!m.g){ // sto bez partije: čeka se početak
+    if(trenutniEkran !== 'online') prikazi('online');
+    osveziOnline();
+    return;
+  }
+  const uIgri = trenutniEkran === 'igra' && jeOnline() && G.br === m.br;
+  if(!uIgri){
+    if(trenutniEkran === 'online' || trenutniEkran === 'igra' || d.tip === 'pocetak' || d.tip === 'revans'){
+      $('prozorKraj').classList.remove('vidljiv');
+      udjiUIgru(onlG(m), d.tip === 'pocetak' || d.tip === 'revans');
+      if(d.tip === 'revans') tost('Revanš! ' + (mojPotez() ? 'Ti počinješ' : 'Prvi baca: ' + ja().ime), 1800);
+      if(G.kraj) zavrsenaPartija();
+    } else G = onlG(m);
+    return;
+  }
+  if(d.tip === 'baci'){
+    await izvrsiBacanje(onlG(m), rukaIgraca(m, d.ko));
+    if(G.potez.faza === 'farkle') zakaziDalje();
+  } else if(d.tip === 'upis'){
+    await izvrsiUpis(null, { g:onlG(m), ukupno:d.ukupno });
+  } else if(d.tip === 'dalje'){
+    await nastaviPosleFarkla(onlG(m));
+  } else {
+    // ulaz / veza / izlaz: stanje partije isto, menja se samo ko je povezan; ako je nešto propušteno, crta se iz stola
+    if(JSON.stringify(Object.assign({}, G, { br:0 })) !== JSON.stringify(Object.assign({}, m.g, { br:0 }))){ G = onlG(m); izbor = new Set(); crtajSve(false); if(G.kraj) zavrsenaPartija(); }
+    else crtajRezultate();
+  }
+}
+// posle farkla: ako se igrač na potezu ne javi (telefon mu zaspao), drugi telefon posle 5 s pošalje „dalje"
+function zakaziDalje(){
+  if(!onl) return;
+  clearTimeout(onl.daljeTajmer);
+  const br = G.br, dn = G.dnevnik.length;
+  onl.daljeTajmer = setTimeout(() => {
+    if(jeOnline() && G.br === br && G.dnevnik.length === dn && G.potez.faza === 'farkle' && !mojPotez()) posaljiStolu({ t:'dalje' });
+  }, 5000);
+}
+
+function osveziOnline(){
+  const s = onl && onl.s && !onl.s.g ? onl.s : null;
+  const cekam = onl && !onl.s;
+  $('onlUlaz').style.display = s || cekam ? 'none' : '';
+  $('onlSto').style.display = s || cekam ? '' : 'none';
+  $('onlPodnozje').style.display = s && s.ja === s.domacin ? '' : 'none';
+  $('onlIme').value = pod.ime || '';
+  $('onlPravila').textContent = sazetakPravila(pod.pravila);
+  if(cekam){ $('onlKodVeliki').textContent = onl.kod; $('onlIgraci').innerHTML = ''; $('onlStatus').textContent = 'Povezujem se sa stolom…'; return; }
+  if(!s) return;
+  $('onlKodVeliki').textContent = s.kod;
+  $('onlIgraci').innerHTML = s.igraci.map((x, i) => '<div class="onl-igrac"><span class="tacka' + (x.povezan ? '' : ' ne') + '"></span>' + esc(x.ime) +
+    (i === s.ja ? ' <small>ti' + (i === s.domacin ? ' · domaćin' : '') + '</small>' : i === s.domacin ? ' <small>domaćin</small>' : '') + '</div>').join('');
+  $('onlPocni').disabled = s.igraci.length < 2;
+  $('onlStatus').textContent = s.ja === s.domacin
+    ? (s.igraci.length < 2 ? 'Pošalji kod i sačekaj da sedne za sto.' : 'Svi su tu? Počni partiju.')
+    : 'Čeka se da ' + s.igraci[s.domacin].ime + ' pokrene partiju.';
+}
+$('dugmeOnline').onclick = () => prikazi('online');
+$('dugmeNazadSto').onclick = () => {
+  const so = sacuvaniSto(); if(!so) { osveziPocetnu(); return; }
+  if(onl && onl.kod === so.kod && onl.s && onl.s.g && jeOnline()){ prikazi('igra'); crtajSve(false); return; }
+  sednizaSto(so.kod, false); prikazi('online');
+};
+$('onlIme').oninput = () => { pod.ime = $('onlIme').value; sacuvajPod(); };
+$('onlKod').oninput = () => { $('onlKod').value = $('onlKod').value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4); };
+$('onlNapravi').onclick = () => { pod.ime = $('onlIme').value.trim(); sacuvajPod(); sednizaSto(noviKod(), true); };
+$('onlUdji').onclick = () => {
+  const kod = $('onlKod').value;
+  if(!/^[A-Z]{4}$/.test(kod)){ tost('Kod ima 4 slova'); return; }
+  pod.ime = $('onlIme').value.trim(); sacuvajPod(); sednizaSto(kod, false);
+};
+$('onlPocni').onclick = () => posaljiStolu({ t:'pocni' });
+$('onlPodeli').onclick = async () => {
+  const kod = onl && (onl.s ? onl.s.kod : onl.kod); if(!kod) return;
+  const url = location.origin + '/Aplikacije/farkle/#sto=' + kod;
+  const tekst = 'Sedi za moj sto u Farkle-u: ' + kod;
+  try{ if(navigator.share){ await navigator.share({ title:'Farkle', text:tekst, url }); return; } }catch(e){ if(e && e.name === 'AbortError') return; }
+  try{ await navigator.clipboard.writeText(tekst + '\n' + url); tost('Kod kopiran'); }catch(e){ tost('Kod: ' + kod, 2500); }
+};
+$('onlineNazad').onclick = () => {
+  if(onl && !(onl.s && onl.s.g)) napustiSto();
+  history.back();
+};
+// link #sto=ABCD: otvara „Preko interneta" sa upisanim kodom (uđe odmah ako je ime poznato)
+(function(){
+  const m = location.hash.match(/(?:^#|&)sto=([A-Za-z]{4})/);
+  if(!m) return;
+  try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  setTimeout(() => {
+    prikazi('online');
+    $('onlKod').value = m[1].toUpperCase();
+    if(pod.ime) sednizaSto(m[1].toUpperCase(), false);
+  }, 300);
+})();
+
 osveziPocetnu();
 if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/Aplikacije/farkle/sw.js').catch(() => {});
-window.__farkle = { kasa: () => kasa, zauzet: () => zauzet, stanje: () => G, postavi: g => { G = g; izbor = new Set(); crtajSve(false); } }; // za automatske probe
+window.__farkle = { kasa: () => kasa, zauzet: () => zauzet, stanje: () => G, onl: () => onl, ekran: () => trenutniEkran, postavi: g => { G = g; izbor = new Set(); crtajSve(false); } }; // za automatske probe
 })();
 </script>
 </body>

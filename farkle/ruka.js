@@ -59,7 +59,7 @@
   function zaPol(p, pol) { return !p.pol || p.pol === pol; }
 
   /* ---------- novčići ---------- */
-  var NAGRADA = { pobeda: { lak: 25, srednji: 50, tezak: 100 }, poraz: 10, lokalno: 15, dnevni: 20 };
+  var NAGRADA = { pobeda: { lak: 25, srednji: 50, tezak: 100 }, poraz: 10, lokalno: 15, dnevni: 20, online: { pobeda: 50, poraz: 15 } };
   function nagrada(ishod, nivo) {
     if (ishod === 'pobeda') return NAGRADA.pobeda[nivo] || 25;
     if (ishod === 'poraz') return NAGRADA.poraz;
