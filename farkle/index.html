@@ -77,6 +77,8 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
 .dugme.glavno{background:linear-gradient(180deg,var(--zlato),var(--zlato2));color:#1d1608;border:none;box-shadow:0 6px 18px rgba(220,187,110,.25)}
 .dugme[disabled]{opacity:.38;pointer-events:none}
 .red-dugmadi{display:flex;gap:.7rem}
+.meni .red-dugmadi .dugme{flex:1}
+.meni .red-dugmadi .dugme.prekini{flex:none;width:3.4rem;padding:0;font-size:1.1rem}
 .red-dugmadi .dugme{flex:1}
 .mala-dugmad{display:flex;justify-content:center;gap:1.4rem;padding-top:.3rem}
 .mala-dugmad button{color:var(--tekst2);font-size:14.5px;padding:.4rem}
@@ -291,9 +293,9 @@ input:focus,textarea:focus{outline:2px solid var(--zlato);outline-offset:1px}
   </div>
   <div>
     <div class="meni">
-      <button class="dugme glavno" id="dugmeNastavi" style="display:none">Nastavi partiju</button>
+      <div class="red-dugmadi" id="redNastavi" style="display:none"><button class="dugme glavno" id="dugmeNastavi">Nastavi partiju</button><button class="dugme prekini" id="prekiniPartiju" aria-label="Prekini partiju">✕</button></div>
       <button class="dugme" id="dugmeKompjuter">🎲 Protiv kompjutera</button>
-      <button class="dugme glavno" id="dugmeNazadSto" style="display:none"></button>
+      <div class="red-dugmadi" id="redNazadSto" style="display:none"><button class="dugme glavno" id="dugmeNazadSto"></button><button class="dugme prekini" id="napustiStoDugme" aria-label="Napusti sto">✕</button></div>
       <button class="dugme" id="dugmeLokalno">👥 Na istom telefonu</button>
       <button class="dugme" id="dugmeOnline">🌐 Preko interneta</button>
       <button class="dugme" id="dugmeProdavnica"><span id="prodIkona">💅</span> Prodavnica <span class="zetoni" id="pocZetoni"></span></button>
@@ -745,9 +747,9 @@ function potvrdi(naslov, tekst, da){
 /* ---------- početna ---------- */
 function sacuvanaPartija(){ const g = ucitaj(KLJ.partija, null); return g && !g.kraj && g.v === 1 ? g : null; }
 function osveziPocetnu(){
-  $('dugmeNastavi').style.display = sacuvanaPartija() ? 'flex' : 'none';
+  $('redNastavi').style.display = sacuvanaPartija() ? 'flex' : 'none';
   const so = sacuvaniSto();
-  $('dugmeNazadSto').style.display = so ? 'flex' : 'none';
+  $('redNazadSto').style.display = so ? 'flex' : 'none';
   if(so) $('dugmeNazadSto').textContent = '🌐 Nazad za sto ' + so.kod;
   $('posvetaTekst').textContent = pod.posveta || '';
   const s = ['lak','srednji','tezak'].map(n => stat[n]).reduce((a, b) => ({ p:a.p + b.p, i:a.i + b.i }), { p:0, i:0 });
@@ -770,6 +772,9 @@ function pitajRuku(){
 }
 $('dugmeProdavnica').onclick = () => { povratak = 'pocetna'; prikazi('prodavnica'); };
 $('dugmeNastavi').onclick = () => { const g = sacuvanaPartija(); if(g) udjiUIgru(g); };
+$('prekiniPartiju').onclick = () => potvrdi('Prekini partiju?', 'Sačuvana partija se briše i ne može da se nastavi.', () => {
+  obrisi(KLJ.partija); if(G && G.mod !== 'online') G = null; osveziPocetnu(); tost('Partija prekinuta');
+});
 $('dugmeKompjuter').onclick = () => { pod.mod = 'bot'; prikazi('nova'); };
 $('dugmeLokalno').onclick = () => { pod.mod = 'lokalno'; prikazi('nova'); };
 let instalPrompt = null;
@@ -1170,7 +1175,11 @@ function zavrsenaPartija(){
   if(zarada) setTimeout(() => zvuk('novcic'), 1300);
   $('krajPobednik').textContent = G.mod === 'bot' ? (covekPobedio ? 'Pobeda!' : 'Kompjuter je pobedio') : online ? (covekPobedio ? 'Pobeda!' : pob.ime + ' pobeđuje!') : (pob.ime + ' pobeđuje!');
   const najPotez = Math.max.apply(null, G.igraci.map(x => x.najPotez));
-  $('krajTekst').textContent = 'Partija je trajala ' + G.krug + ' ' + (G.krug % 10 === 1 && G.krug % 100 !== 11 ? 'krug' : (G.krug % 10 >= 2 && G.krug % 10 <= 4 && (G.krug % 100 < 12 || G.krug % 100 > 14)) ? 'kruga' : 'krugova') + '. Najveći potez: ' + broj(najPotez) + '.';
+  const predao = online && G.kraj.predao >= 0 ? G.igraci[G.kraj.predao] : null;
+  const sam = online && onl && onl.s && onl.s.igraci.filter((x, i) => i !== onl.ja && !x.otisao).length === 0;
+  $('krajRevans').style.display = sam ? 'none' : '';
+  if(predao) $('krajTekst').textContent = predao.ime + ' više nije za stolom — partija je prekinuta.';
+  else $('krajTekst').textContent = 'Partija je trajala ' + G.krug + ' ' + (G.krug % 10 === 1 && G.krug % 100 !== 11 ? 'krug' : (G.krug % 10 >= 2 && G.krug % 10 <= 4 && (G.krug % 100 < 12 || G.krug % 100 > 14)) ? 'kruga' : 'krugova') + '. Najveći potez: ' + broj(najPotez) + '.';
   const red = G.igraci.map((x, i) => ({ x, i })).sort((a, b) => b.x.poeni - a.x.poeni);
   $('krajTabela').innerHTML = red.map((r, k) => '<div class="' + (k === 0 ? 'prvi' : '') + '"><span>' + (k + 1) + '. ' + (r.x.tip === 'bot' ? '🤖 ' : '') + esc(r.x.ime) + '</span><b>' + broj(r.x.poeni) + '</b></div>').join('');
   setTimeout(() => {
@@ -1392,9 +1401,19 @@ function zatvoriSto(){
   try{ onl.ws && onl.ws.close(1000); }catch(e){}
   onl = null;
 }
-function napustiSto(){
-  if(onl && onl.ws && onl.ws.readyState === 1) try{ onl.ws.send(JSON.stringify({ t:'izlazi' })); }catch(e){}
+function napustiSto(kod){
+  kod = kod || (onl && onl.kod);
+  if(onl && onl.kod === kod && onl.ws && onl.ws.readyState === 1) try{ onl.ws.send(JSON.stringify({ t:'izlazi' })); }catch(e){}
+  else if(kod){
+    // nema žive veze: kratko se javi stolu samo da kaže da izlazi
+    try{
+      const ws = new WebSocket(stoAdresa(kod));
+      ws.onopen = () => { ws.send(JSON.stringify({ t:'zdravo', id:mojId, kod, ime:imeOnline() })); ws.send(JSON.stringify({ t:'izlazi' })); setTimeout(() => { try{ ws.close(1000); }catch(e){} }, 3000); };
+      setTimeout(() => { try{ ws.close(1000); }catch(e){} }, 8000);
+    }catch(e){}
+  }
   zatvoriSto(); obrisi(ONL_KLJ);
+  if(G && G.mod === 'online') G = null;
 }
 setInterval(() => { if(onl && onl.ws && onl.ws.readyState === 1) try{ onl.ws.send('ping'); }catch(e){} }, 25000);
 document.addEventListener('visibilitychange', () => {
@@ -1463,9 +1482,16 @@ function osveziOnline(){
     : 'Čeka se da ' + s.igraci[s.domacin].ime + ' pokrene partiju.';
 }
 $('dugmeOnline').onclick = () => prikazi('online');
+$('napustiStoDugme').onclick = () => {
+  const so = sacuvaniSto(); if(!so){ osveziPocetnu(); return; }
+  const uToku = onl && onl.kod === so.kod && onl.s && onl.s.g && !onl.s.g.kraj;
+  potvrdi('Napusti sto ' + so.kod + '?', uToku || !onl ? 'Ako je partija u toku, prekida se i pobeđuje drugi igrač.' : 'Izlaziš iz stola.', () => {
+    napustiSto(so.kod); osveziPocetnu(); tost('Sto ' + so.kod + ' napušten');
+  });
+};
 $('dugmeNazadSto').onclick = () => {
   const so = sacuvaniSto(); if(!so) { osveziPocetnu(); return; }
-  if(onl && onl.kod === so.kod && onl.s && onl.s.g && jeOnline()){ prikazi('igra'); crtajSve(false); return; }
+  if(onl && onl.kod === so.kod && onl.s && onl.s.g && jeOnline()){ prikazi('igra'); crtajSve(false); if(G.kraj) zavrsenaPartija(); return; }
   sednizaSto(so.kod, false); prikazi('online');
 };
 $('onlIme').oninput = () => { pod.ime = $('onlIme').value; sacuvajPod(); };
